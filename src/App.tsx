@@ -82,9 +82,9 @@ import { Class4Section } from "./components/Class4Section";
 import { CLASS5_HERO } from "./data/class5Content";
 import { Class5Section } from "./components/Class5Section";
 
-const choKuReiImg = "/assets/CKR.jpg";
-const seiHeKiImg = "/assets/SHK.jpg";
-const honShaZeShoNenImg = "/assets/HSZSN.jpg";
+import choKuReiImg from "./assets/images/CKR.png";
+import seiHeKiImg from "./assets/images/SHK.png";
+import honShaZeShoNenImg from "./assets/images/HSZSN.png";
 import toriiGateImg from "./assets/images/torii_gate.jpg";
 
 export default function App() {
