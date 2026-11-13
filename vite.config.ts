@@ -6,20 +6,6 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
-    build: {
-      rollupOptions: {
-        output: {
-          // Preserve stable URLs for imported images (e.g. /assets/CKR.png).
-          assetFileNames: (assetInfo) => {
-            const name = assetInfo.name || '';
-            if (/\.(png|jpe?g|gif|webp|svg)$/i.test(name)) {
-              return 'assets/[name][extname]';
-            }
-            return 'assets/[name]-[hash][extname]';
-          },
-        },
-      },
-    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
