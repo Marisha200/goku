@@ -1,25 +1,11 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { readFileSync } from 'node:fs';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss(), {
-      name: 'publish-reiki-symbol-images',
-      apply: 'build' as const,
-      generateBundle() {
-        // Original source files contain JPEG bytes despite their .png filenames.
-        for (const name of ['CKR', 'SHK', 'HSZSN']) {
-          this.emitFile({
-            type: 'asset',
-            fileName: `assets/${name}.jpg`,
-            source: readFileSync(path.resolve(__dirname, `src/assets/images/${name}.png`)),
-          });
-        }
-      },
-    }],
+    plugins: [react(), tailwindcss()],
     build: {
       rollupOptions: {
         output: {
