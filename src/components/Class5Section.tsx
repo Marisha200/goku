@@ -10,7 +10,6 @@ import {
   BookOpen,
   Activity,
   Compass,
-  Video,
   Award,
   ChevronLeft,
   ChevronRight,
@@ -21,14 +20,7 @@ import {
   CheckCircle2,
   XCircle,
   Sparkles,
-  FileText,
   Download,
-  Plus,
-  Trash2,
-  Upload,
-  Link as LinkIcon,
-  ExternalLink,
-  Youtube,
   Printer,
   Lightbulb,
   HelpCircle
@@ -46,6 +38,11 @@ import {
   CLASS5_SIMULATOR_CASES,
   CLASS5_TRIVIA_QUESTIONS
 } from "../data/class5Content";
+import {
+  ClassVideosMaterial,
+  ClassVideoItem,
+  ClassMaterialItem
+} from "./ClassVideosMaterial";
 
 interface Class5SectionProps {
   activeTab: string;
@@ -199,61 +196,28 @@ export const Class5Section: React.FC<Class5SectionProps> = ({
     Record<string, { pasa: string; necesita: string; dirias: string; showGuide: boolean }>
   >({});
 
-  // Pantalla 6: Videos y Material + Fichas imprimibles
-  interface C5VideoItem {
-    uid: string;
-    embedId: string;
-    type: "youtube" | "youtube_playlist";
-    title: string;
-    description: string;
-    url: string;
-  }
-
-  interface C5MaterialItem {
-    id: string;
-    kind: "pdf_upload" | "blog_link" | "pdf_link";
-    title: string;
-    description: string;
-    url: string;
-    fileName?: string;
-    fileSizeLabel?: string;
-  }
-
-  const [c5Videos, setC5Videos] = useState<C5VideoItem[]>(() => {
-    try {
-      const saved = localStorage.getItem("reiki_c5_videos");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
+  // Videos y Material seleccionados por la docente + Fichas imprimibles
+  const c5Videos: ClassVideoItem[] = [
+    {
+      uid: "eIho2S0ZahI",
+      embedId: "eIho2S0ZahI",
+      type: "youtube",
+      title: "Cómo hablar para que la gente te quiera escuchar (Julian Treasure)",
+      description:
+        "Charla TED sobre comunicación clara, los cuatro pilares (honestidad, autenticidad, integridad y amor) y recursos de la voz para explicar con presencia.",
+      url: "https://www.youtube.com/watch?v=eIho2S0ZahI"
+    },
+    {
+      uid: "ESwDIXXyh_Y",
+      embedId: "ESwDIXXyh_Y",
+      type: "youtube",
+      title: "Cómo hablar con otros que piensan distinto (Guadalupe Nogués)",
+      description:
+        "Charla TEDxRiodelaPlata sobre cómo escuchar, tender puentes y acompañar conversaciones respetuosas frente a miradas diversas dentro de un grupo.",
+      url: "https://www.youtube.com/watch?v=ESwDIXXyh_Y"
     }
-  });
-  const [selectedC5VideoUid, setSelectedC5VideoUid] = useState<string>(() => {
-    try {
-      const saved = localStorage.getItem("reiki_c5_videos");
-      const parsed = saved ? JSON.parse(saved) : [];
-      return parsed.length > 0 ? parsed[0].uid : "";
-    } catch {
-      return "";
-    }
-  });
-  const [newVideoTitle, setNewVideoTitle] = useState<string>("");
-  const [newVideoUrl, setNewVideoUrl] = useState<string>("");
-  const [newVideoDesc, setNewVideoDesc] = useState<string>("");
-  const [videoFormError, setVideoFormError] = useState<string>("");
-
-  const [c5Materials, setC5Materials] = useState<C5MaterialItem[]>(() => {
-    try {
-      const saved = localStorage.getItem("reiki_c5_materials");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [newLinkTitle, setNewLinkTitle] = useState<string>("");
-  const [newLinkUrl, setNewLinkUrl] = useState<string>("");
-  const [newLinkDesc, setNewLinkDesc] = useState<string>("");
-  const [newLinkKind, setNewLinkKind] = useState<"blog_link" | "pdf_link">("blog_link");
-  const [materialError, setMaterialError] = useState<string>("");
+  ];
+  const c5Materials: ClassMaterialItem[] = [];
   const [activeFichaId, setActiveFichaId] = useState<string | null>(null);
 
   // Pantalla 7: Juegos evaluativos (Match dinámicas, Simuladores, Test Evaluativo & Diploma)
@@ -267,147 +231,6 @@ export const Class5Section: React.FC<Class5SectionProps> = ({
   const [finalReflection, setFinalReflection] = useState<string>("");
   const [diplomaName, setDiplomaName] = useState<string>("");
   const [viewingDiploma, setViewingDiploma] = useState<boolean>(false);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("reiki_c5_videos", JSON.stringify(c5Videos));
-    } catch {
-      // ignore storage quota errors
-    }
-  }, [c5Videos]);
-
-  useEffect(() => {
-    try {
-      const persistable = c5Materials.filter((m) => !m.url.startsWith("blob:"));
-      localStorage.setItem("reiki_c5_materials", JSON.stringify(persistable));
-    } catch {
-      // ignore storage quota errors
-    }
-  }, [c5Materials]);
-
-  const parseYouTubeInput = (
-    rawUrl: string
-  ): { embedId: string; type: "youtube" | "youtube_playlist" } | null => {
-    const trimmed = rawUrl.trim();
-    if (!trimmed) return null;
-
-    try {
-      const urlObj = new URL(trimmed.startsWith("http") ? trimmed : `https://${trimmed}`);
-      const listId = urlObj.searchParams.get("list");
-      const vId = urlObj.searchParams.get("v");
-
-      if (listId && !vId) {
-        return { embedId: listId, type: "youtube_playlist" };
-      }
-      if (vId) {
-        return { embedId: vId, type: "youtube" };
-      }
-      if (urlObj.hostname.includes("youtu.be")) {
-        const pathId = urlObj.pathname.replace("/", "").trim();
-        if (pathId) return { embedId: pathId, type: "youtube" };
-      }
-      if (urlObj.pathname.includes("/shorts/") || urlObj.pathname.includes("/embed/")) {
-        const parts = urlObj.pathname.split("/").filter(Boolean);
-        const last = parts[parts.length - 1];
-        if (last) return { embedId: last, type: "youtube" };
-      }
-      if (listId) {
-        return { embedId: listId, type: "youtube_playlist" };
-      }
-    } catch {
-      // Fallback regex
-    }
-
-    const ytMatch = trimmed.match(
-      /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/
-    );
-    if (ytMatch && ytMatch[1]) {
-      return { embedId: ytMatch[1], type: "youtube" };
-    }
-    return null;
-  };
-
-  const handleAddYouTubeVideo = (e: React.FormEvent) => {
-    e.preventDefault();
-    setVideoFormError("");
-    const parsed = parseYouTubeInput(newVideoUrl);
-    if (!parsed) {
-      setVideoFormError("Pegá un enlace válido de YouTube (video o lista de reproducción).");
-      return;
-    }
-    const uid = `c5v_${Date.now()}`;
-    const item: C5VideoItem = {
-      uid,
-      embedId: parsed.embedId,
-      type: parsed.type,
-      title: newVideoTitle.trim() || "Video pedagógico de Clase V",
-      description: newVideoDesc.trim() || "Recurso audiovisual para El Arte de Enseñar.",
-      url: newVideoUrl.trim().startsWith("http") ? newVideoUrl.trim() : `https://${newVideoUrl.trim()}`
-    };
-    setC5Videos((prev) => [item, ...prev]);
-    setSelectedC5VideoUid(uid);
-    setNewVideoTitle("");
-    setNewVideoUrl("");
-    setNewVideoDesc("");
-  };
-
-  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMaterialError("");
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-      setMaterialError("Seleccioná únicamente archivos en formato PDF.");
-      return;
-    }
-    const blobUrl = URL.createObjectURL(file);
-    const sizeKb = Math.max(1, Math.round(file.size / 1024));
-    const sizeLabel =
-      sizeKb >= 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`;
-
-    const newItem: C5MaterialItem = {
-      id: `c5m_${Date.now()}`,
-      kind: "pdf_upload",
-      title: file.name.replace(/\.pdf$/i, ""),
-      description: "Documento PDF cargado desde tu dispositivo.",
-      url: blobUrl,
-      fileName: file.name,
-      fileSizeLabel: sizeLabel
-    };
-    setC5Materials((prev) => [newItem, ...prev]);
-    e.target.value = "";
-  };
-
-  const handleAddMaterialLink = (e: React.FormEvent) => {
-    e.preventDefault();
-    setMaterialError("");
-    const rawUrl = newLinkUrl.trim();
-    if (!rawUrl) {
-      setMaterialError("Ingresá una URL válida hacia el blog o documento.");
-      return;
-    }
-    const normalizedUrl =
-      rawUrl.startsWith("http://") || rawUrl.startsWith("https://")
-        ? rawUrl
-        : `https://${rawUrl}`;
-
-    const newItem: C5MaterialItem = {
-      id: `c5m_${Date.now()}`,
-      kind: newLinkKind,
-      title:
-        newLinkTitle.trim() ||
-        (newLinkKind === "blog_link" ? "Artículo del Blog Rincón Zen" : "Documento PDF"),
-      description:
-        newLinkDesc.trim() ||
-        (newLinkKind === "blog_link"
-          ? "Lectura complementaria en el blog."
-          : "Documento externo para descarga o lectura."),
-      url: normalizedUrl
-    };
-    setC5Materials((prev) => [newItem, ...prev]);
-    setNewLinkTitle("");
-    setNewLinkUrl("");
-    setNewLinkDesc("");
-  };
 
   const wordCount = simpleExplanation
     .trim()
@@ -601,7 +424,7 @@ export const Class5Section: React.FC<Class5SectionProps> = ({
           {/* Enseñanza del módulo */}
           <div className="bg-natural-primary/10 border-l-4 border-natural-primary p-5 rounded-r-2xl">
             <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-natural-primary block mb-1">
-              Enseñanza del módulo
+              Enseñanza clave
             </span>
             <p className="font-serif italic text-sm sm:text-base text-natural-dark leading-relaxed">
               &ldquo;{CLASS5_INICIO.teaching}&rdquo;
@@ -804,7 +627,7 @@ export const Class5Section: React.FC<Class5SectionProps> = ({
 
           <div className="bg-natural-primary/10 border-l-4 border-natural-primary p-5 rounded-r-2xl">
             <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-natural-primary block mb-1">
-              Enseñanza del módulo
+              Enseñanza clave
             </span>
             <p className="font-serif italic text-sm sm:text-base text-natural-dark leading-relaxed">
               &ldquo;{CLASS5_ADULTO.teaching}&rdquo;
@@ -1033,7 +856,7 @@ export const Class5Section: React.FC<Class5SectionProps> = ({
 
           <div className="bg-natural-primary/10 border-l-4 border-natural-primary p-5 rounded-r-2xl">
             <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-natural-primary block mb-1">
-              Enseñanza del módulo
+              Enseñanza clave
             </span>
             <p className="font-serif italic text-sm sm:text-base text-natural-dark leading-relaxed">
               &ldquo;{CLASS5_EXPLICAR.teaching}&rdquo;
@@ -1321,7 +1144,7 @@ export const Class5Section: React.FC<Class5SectionProps> = ({
 
           <div className="bg-natural-primary/10 border-l-4 border-natural-primary p-5 rounded-r-2xl">
             <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-natural-primary block mb-1">
-              Enseñanza del módulo
+              Enseñanza clave
             </span>
             <p className="font-serif italic text-sm sm:text-base text-natural-dark leading-relaxed">
               &ldquo;{CLASS5_DINAMICAS.teaching}&rdquo;
@@ -1520,7 +1343,7 @@ export const Class5Section: React.FC<Class5SectionProps> = ({
 
           <div className="bg-natural-primary/10 border-l-4 border-natural-primary p-5 rounded-r-2xl">
             <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-natural-primary block mb-1">
-              Enseñanza del módulo
+              Enseñanza clave
             </span>
             <p className="font-serif italic text-sm sm:text-base text-natural-dark leading-relaxed">
               &ldquo;{CLASS5_GRUPO.teaching}&rdquo;
@@ -1548,427 +1371,85 @@ export const Class5Section: React.FC<Class5SectionProps> = ({
 
       {/* === 6. VIDEOS Y MATERIAL (BIBLIOTECA Y FICHAS IMPRIMIBLES) === */}
       {activeTab === "c5_videos" && (
-        <div className="space-y-6 animate-fade-in">
-          <div className="flex items-center justify-between border-b pb-4 border-natural-border print:hidden">
-            <div className="flex items-center gap-3">
-              <Video className="w-6 h-6 text-natural-primary" />
-              <h3 className="text-xl sm:text-2xl font-serif text-natural-dark font-bold">
-                Videos y Material (Clase V)
-              </h3>
-            </div>
-            <span className="text-[10px] px-2.5 py-0.5 bg-natural-cream text-natural-primary rounded-md uppercase tracking-wider font-mono font-semibold">
-              Biblioteca y Fichas Imprimibles
-            </span>
-          </div>
+        <ClassVideosMaterial
+          classTitle="Clase V"
+          badge="Sintonía Audiovisual"
+          introText="Acompañá tu estudio de El Arte de Enseñar con los videos seleccionados, lecturas y fichas imprimibles para preparar tus clases."
+          defaultVideos={c5Videos}
+          defaultMaterials={c5Materials}
+          onBack={() => onNavigateTab("c5_grupo")}
+          onNext={() => onNavigateTab("c5_juegos")}
+          nextLabel="Juegos Evaluativos"
+          footerContent={
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center justify-between print:hidden">
+                <h4 className="font-serif text-base font-bold text-natural-dark flex items-center gap-2">
+                  <Printer className="w-4 h-4 text-natural-primary" />
+                  <span>Fichas Imprimibles para el Futuro Maestro</span>
+                </h4>
+              </div>
 
-          <p className="text-natural-text-muted text-xs sm:text-sm leading-relaxed print:hidden">
-            Acá tenés fichas imprimibles para preparar tus clases, además del reproductor de YouTube, carga de PDF y enlaces al blog.
-          </p>
-
-          <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 print:hidden">
-            <Clock className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-900 leading-relaxed font-medium">
-              Esta sección está pendiente de ampliación: en breve se irá subiendo más material audiovisual, lecturas y fichas complementarias para El Arte de Enseñar.
-            </p>
-          </div>
-
-          {/* Fichas imprimibles */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between print:hidden">
-              <h4 className="font-serif text-base font-bold text-natural-dark flex items-center gap-2">
-                <Printer className="w-4 h-4 text-natural-primary" />
-                <span>Fichas Imprimibles para el Futuro Maestro</span>
-              </h4>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {CLASS5_FICHAS_IMPRIMIBLES.map((ficha) => {
-                const isSelectedForPrint = activeFichaId === ficha.id;
-                const hideInPrint = activeFichaId !== null && !isSelectedForPrint;
-                return (
-                  <div
-                    key={ficha.id}
-                    className={`bg-white p-6 rounded-3xl border border-natural-border shadow-3xs flex flex-col justify-between gap-4 ${
-                      hideInPrint ? "print:hidden" : "print:border print:shadow-none print:col-span-2"
-                    }`}
-                  >
-                    <div className="space-y-3">
-                      <div>
-                        <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-natural-primary">
-                          {ficha.code}
-                        </span>
-                        <h5 className="font-serif text-base font-bold text-natural-dark mt-0.5">
-                          {ficha.title}
-                        </h5>
-                        <p className="text-xs text-natural-text-muted mt-0.5">
-                          {ficha.subtitle}
-                        </p>
-                      </div>
-
-                      <div className="space-y-3 pt-2 border-t border-natural-border/60">
-                        {ficha.sections.map((sec, sIdx) => (
-                          <div key={sIdx} className="space-y-1.5">
-                            <p className="text-xs font-bold text-natural-dark">{sec.heading}</p>
-                            <ul className="space-y-1 text-[11px] text-natural-text-muted leading-relaxed">
-                              {sec.items.map((it, iIdx) => (
-                                <li key={iIdx} className="flex items-start gap-1.5">
-                                  <span className="text-natural-primary font-bold">•</span>
-                                  <span>{it}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end pt-3 border-t border-natural-border/60 print:hidden">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveFichaId(ficha.id);
-                          setTimeout(() => window.print(), 100);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-natural-sand hover:bg-natural-primary/15 text-natural-primary rounded-xl text-xs font-bold transition-colors border border-natural-border/60"
-                      >
-                        <Printer className="w-3.5 h-3.5" />
-                        <span>Imprimir esta ficha</span>
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Biblioteca YouTube + PDF + Blog */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden">
-            <div className="lg:col-span-2 space-y-4">
-              {c5Videos.find((v) => v.uid === selectedC5VideoUid) ? (
-                (() => {
-                  const activeVid = c5Videos.find((v) => v.uid === selectedC5VideoUid)!;
-                  const embedSrc =
-                    activeVid.type === "youtube_playlist"
-                      ? `https://www.youtube.com/embed/videoseries?list=${activeVid.embedId}`
-                      : `https://www.youtube.com/embed/${activeVid.embedId}`;
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {CLASS5_FICHAS_IMPRIMIBLES.map((ficha) => {
+                  const isSelectedForPrint = activeFichaId === ficha.id;
+                  const hideInPrint = activeFichaId !== null && !isSelectedForPrint;
                   return (
-                    <div className="bg-white p-4 rounded-3xl border border-natural-border shadow-3xs overflow-hidden">
-                      <div className="aspect-video w-full rounded-2xl overflow-hidden border border-natural-border bg-black">
-                        <iframe
-                          className="w-full h-full"
-                          src={embedSrc}
-                          title={activeVid.title}
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
-                      </div>
-                      <div className="mt-4 flex flex-wrap items-start justify-between gap-2">
+                    <div
+                      key={ficha.id}
+                      className={`bg-white p-6 rounded-3xl border border-natural-border shadow-3xs flex flex-col justify-between gap-4 ${
+                        hideInPrint ? "print:hidden" : "print:border print:shadow-none print:col-span-2"
+                      }`}
+                    >
+                      <div className="space-y-3">
                         <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-serif text-base text-natural-dark font-bold">
-                              {activeVid.title}
-                            </span>
-                            <span className="text-[9px] px-2 py-0.5 rounded font-mono font-bold uppercase bg-red-100 text-red-700">
-                              {activeVid.type === "youtube_playlist" ? "Playlist YouTube" : "YouTube"}
-                            </span>
-                          </div>
-                          <p className="text-xs text-natural-text-muted leading-relaxed">
-                            {activeVid.description}
+                          <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-natural-primary">
+                            {ficha.code}
+                          </span>
+                          <h5 className="font-serif text-base font-bold text-natural-dark mt-0.5">
+                            {ficha.title}
+                          </h5>
+                          <p className="text-xs text-natural-text-muted mt-0.5">
+                            {ficha.subtitle}
                           </p>
                         </div>
-                        <a
-                          href={activeVid.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-natural-cream hover:bg-natural-sand text-[11px] font-semibold text-natural-dark transition-colors shrink-0"
+
+                        <div className="space-y-3 pt-2 border-t border-natural-border/60">
+                          {ficha.sections.map((sec, sIdx) => (
+                            <div key={sIdx} className="space-y-1.5">
+                              <p className="text-xs font-bold text-natural-dark">{sec.heading}</p>
+                              <ul className="space-y-1 text-[11px] text-natural-text-muted leading-relaxed">
+                                {sec.items.map((it, iIdx) => (
+                                  <li key={iIdx} className="flex items-start gap-1.5">
+                                    <span className="text-natural-primary font-bold">•</span>
+                                    <span>{it}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-3 border-t border-natural-border/60 print:hidden">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveFichaId(ficha.id);
+                            setTimeout(() => window.print(), 100);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-natural-sand hover:bg-natural-primary/15 text-natural-primary rounded-xl text-xs font-bold transition-colors border border-natural-border/60"
                         >
-                          <ExternalLink className="w-3.5 h-3.5 text-natural-primary" />
-                          <span>Abrir en YouTube</span>
-                        </a>
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>Imprimir esta ficha</span>
+                        </button>
                       </div>
                     </div>
                   );
-                })()
-              ) : (
-                <div className="bg-natural-sand/30 border border-dashed border-natural-border p-10 text-center rounded-3xl space-y-2">
-                  <Youtube className="w-12 h-12 text-natural-primary/40 mx-auto" />
-                  <p className="text-sm font-serif font-bold text-natural-dark">
-                    Reproductor de YouTube listo
-                  </p>
-                  <p className="text-xs text-natural-text-muted max-w-md mx-auto">
-                    Pegá el enlace de un video o lista de reproducción de YouTube en el panel derecho para reproducirlo acá mismo.
-                  </p>
-                </div>
-              )}
-
-              <div className="bg-white p-5 rounded-3xl border border-natural-border shadow-3xs space-y-4">
-                <div className="flex items-center justify-between border-b pb-2.5 border-natural-border/60">
-                  <h4 className="font-serif text-sm font-bold text-natural-dark flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-natural-primary" />
-                    <span>Archivos PDF y Links al Blog ({c5Materials.length})</span>
-                  </h4>
-                </div>
-
-                {c5Materials.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {c5Materials.map((item) => (
-                      <div
-                        key={item.id}
-                        className="p-4 rounded-2xl border border-natural-border bg-natural-eggshell/50 flex flex-col justify-between gap-3"
-                      >
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between gap-2">
-                            <span
-                              className={`text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded ${
-                                item.kind === "blog_link"
-                                  ? "bg-natural-cream text-natural-primary"
-                                  : "bg-amber-50 text-amber-800 border border-amber-200/70"
-                              }`}
-                            >
-                              {item.kind === "blog_link"
-                                ? "Link al Blog"
-                                : item.kind === "pdf_upload"
-                                ? `PDF ${item.fileSizeLabel ? `· ${item.fileSizeLabel}` : ""}`
-                                : "PDF por enlace"}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setC5Materials((prev) => prev.filter((m) => m.id !== item.id))
-                              }
-                              aria-label="Eliminar material"
-                              className="text-natural-text-muted hover:text-red-600 transition-colors"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                          <h5 className="font-serif text-sm font-bold text-natural-dark leading-snug">
-                            {item.title}
-                          </h5>
-                          <p className="text-[11px] text-natural-text-muted leading-relaxed">
-                            {item.description}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-natural-border/50">
-                          {item.kind === "pdf_upload" && item.fileName ? (
-                            <a
-                              href={item.url}
-                              download={item.fileName}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-natural-primary text-white rounded-lg text-[10px] uppercase tracking-wider font-bold hover:bg-natural-primary/95 transition-colors"
-                            >
-                              <Download className="w-3 h-3" />
-                              <span>Descargar PDF</span>
-                            </a>
-                          ) : (
-                            <a
-                              href={item.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-natural-primary text-white rounded-lg text-[10px] uppercase tracking-wider font-bold hover:bg-natural-primary/95 transition-colors"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              <span>{item.kind === "blog_link" ? "Leer en el Blog" : "Abrir PDF"}</span>
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-natural-text-muted py-4 text-center">
-                    Todavía no hay archivos PDF ni enlaces cargados. Podés subir un PDF o agregar un link al blog desde el panel derecho.
-                  </p>
-                )}
+                })}
               </div>
             </div>
-
-            <div className="space-y-5">
-              <div className="bg-white p-5 rounded-3xl border border-natural-border shadow-3xs space-y-4">
-                <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border/60 flex items-center gap-1.5">
-                  <Youtube className="w-4 h-4 text-red-600" />
-                  <span>Videos de YouTube ({c5Videos.length})</span>
-                </h4>
-
-                {c5Videos.length > 0 && (
-                  <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-                    {c5Videos.map((vid) => {
-                      const isSelected = vid.uid === selectedC5VideoUid;
-                      return (
-                        <div
-                          key={vid.uid}
-                          className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${
-                            isSelected
-                              ? "bg-natural-cream text-natural-primary border-natural-primary font-medium"
-                              : "bg-natural-eggshell hover:bg-natural-sand/30 border-natural-border/70 text-natural-dark"
-                          }`}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => setSelectedC5VideoUid(vid.uid)}
-                            className="flex items-center gap-2 text-xs text-left min-w-0 flex-1"
-                          >
-                            <div
-                              className={`p-1.5 rounded-lg shrink-0 ${
-                                isSelected
-                                  ? "bg-natural-primary text-white"
-                                  : "bg-natural-sand text-natural-primary"
-                              }`}
-                            >
-                              <Play className="w-3 h-3 fill-current" />
-                            </div>
-                            <span className="truncate font-semibold">{vid.title}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setC5Videos((prev) => prev.filter((item) => item.uid !== vid.uid));
-                              if (selectedC5VideoUid === vid.uid) setSelectedC5VideoUid("");
-                            }}
-                            aria-label="Quitar video"
-                            className="p-1 text-natural-text-muted hover:text-red-600 transition-colors shrink-0"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                <form
-                  onSubmit={handleAddYouTubeVideo}
-                  className="space-y-2.5 pt-2 border-t border-natural-border/50"
-                >
-                  <p className="text-[10px] font-mono uppercase font-bold text-natural-primary">
-                    + Agregar video o playlist de YouTube
-                  </p>
-                  <input
-                    type="text"
-                    value={newVideoTitle}
-                    onChange={(e) => setNewVideoTitle(e.target.value)}
-                    placeholder="Título del video..."
-                    className="w-full p-2 rounded-xl border border-natural-border bg-natural-bg text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  <input
-                    type="text"
-                    value={newVideoUrl}
-                    onChange={(e) => setNewVideoUrl(e.target.value)}
-                    placeholder="URL de YouTube (watch?v=... o list=...)"
-                    className="w-full p-2 rounded-xl border border-natural-border bg-natural-bg text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  <input
-                    type="text"
-                    value={newVideoDesc}
-                    onChange={(e) => setNewVideoDesc(e.target.value)}
-                    placeholder="Breve descripción (opcional)"
-                    className="w-full p-2 rounded-xl border border-natural-border bg-natural-bg text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  {videoFormError && (
-                    <p className="text-[11px] text-red-600">{videoFormError}</p>
-                  )}
-                  <button
-                    type="submit"
-                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-natural-primary text-white rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Agregar Video</span>
-                  </button>
-                </form>
-              </div>
-
-              <div className="bg-gradient-to-b from-natural-cream/80 to-natural-sand/50 p-5 rounded-3xl border border-natural-border shadow-3xs space-y-4">
-                <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border/60 flex items-center gap-1.5">
-                  <Upload className="w-4 h-4 text-natural-primary" />
-                  <span>Subir PDF o Link al Blog</span>
-                </h4>
-
-                <label className="flex flex-col items-center justify-center gap-1.5 p-4 rounded-2xl border-2 border-dashed border-natural-primary/35 bg-white/80 hover:bg-white cursor-pointer transition-colors text-center">
-                  <Upload className="w-5 h-5 text-natural-primary" />
-                  <span className="text-xs font-semibold text-natural-dark">
-                    Subir archivo PDF
-                  </span>
-                  <span className="text-[10px] text-natural-text-muted">
-                    Seleccioná un documento .pdf desde tu dispositivo
-                  </span>
-                  <input
-                    type="file"
-                    accept="application/pdf,.pdf"
-                    onChange={handlePdfUpload}
-                    className="hidden"
-                  />
-                </label>
-
-                <form
-                  onSubmit={handleAddMaterialLink}
-                  className="space-y-2.5 pt-2 border-t border-natural-border/60"
-                >
-                  <p className="text-[10px] font-mono uppercase font-bold text-natural-primary flex items-center gap-1">
-                    <LinkIcon className="w-3 h-3" />
-                    <span>Agregar enlace al blog o PDF</span>
-                  </p>
-                  <select
-                    value={newLinkKind}
-                    onChange={(e) => setNewLinkKind(e.target.value as "blog_link" | "pdf_link")}
-                    className="w-full p-2 rounded-xl border border-natural-border bg-white text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  >
-                    <option value="blog_link">Link al Blog / Artículo</option>
-                    <option value="pdf_link">Enlace externo a PDF (Drive / web)</option>
-                  </select>
-                  <input
-                    type="text"
-                    value={newLinkTitle}
-                    onChange={(e) => setNewLinkTitle(e.target.value)}
-                    placeholder="Título del artículo o PDF..."
-                    className="w-full p-2 rounded-xl border border-natural-border bg-white text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  <input
-                    type="text"
-                    value={newLinkUrl}
-                    onChange={(e) => setNewLinkUrl(e.target.value)}
-                    placeholder="https://www.rinconzen.com.ar/..."
-                    className="w-full p-2 rounded-xl border border-natural-border bg-white text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  <input
-                    type="text"
-                    value={newLinkDesc}
-                    onChange={(e) => setNewLinkDesc(e.target.value)}
-                    placeholder="Nota breve (opcional)"
-                    className="w-full p-2 rounded-xl border border-natural-border bg-white text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  {materialError && (
-                    <p className="text-[11px] text-red-600">{materialError}</p>
-                  )}
-                  <button
-                    type="submit"
-                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-natural-dark text-white rounded-xl text-xs font-semibold hover:bg-natural-dark/90 transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Guardar Enlace</span>
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center pt-4 border-t border-natural-border print:hidden">
-            <button
-              onClick={() => onNavigateTab("c5_grupo")}
-              className="inline-flex items-center space-x-1 px-4 py-2 bg-natural-cream hover:bg-natural-sand rounded-xl text-xs font-semibold text-natural-dark transition shadow-2xs"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              <span>Volver</span>
-            </button>
-            <button
-              onClick={() => onNavigateTab("c5_juegos")}
-              className="inline-flex items-center space-x-1.5 px-5 py-2.5 bg-natural-primary text-white rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors shadow-sm"
-            >
-              <span>Juegos Evaluativos</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
+          }
+        />
       )}
 
       {/* === 7. JUEGOS EVALUATIVOS (SIMULADORES, DESAFÍOS Y EVALUACIÓN) === */}
@@ -2345,7 +1826,7 @@ export const Class5Section: React.FC<Class5SectionProps> = ({
                 ) : (
                   <div className="space-y-6">
                     <p className="text-xs text-natural-text-muted leading-relaxed">
-                      Respondé las siguientes 6 preguntas sobre los módulos de la Clase V:
+                      Respondé las siguientes 6 preguntas sobre los contenidos de la Clase V:
                     </p>
 
                     <div className="space-y-6">

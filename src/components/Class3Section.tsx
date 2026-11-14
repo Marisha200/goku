@@ -10,7 +10,6 @@ import {
   Sun,
   Sparkles,
   Activity,
-  Video,
   Award,
   ChevronLeft,
   ChevronRight,
@@ -19,16 +18,9 @@ import {
   Pause,
   RotateCw,
   CheckCircle2,
-  FileText,
   Download,
-  BookOpen,
-  Plus,
-  Trash2,
   Eye,
-  Upload,
-  Link as LinkIcon,
   ExternalLink,
-  Youtube,
   Flame
 } from "lucide-react";
 
@@ -43,6 +35,11 @@ import {
   CLASS3_TRIVIA_QUESTIONS,
   CLASS3_CIERRE
 } from "../data/class3Content";
+import {
+  ClassVideosMaterial,
+  ClassVideoItem,
+  ClassMaterialItem
+} from "./ClassVideosMaterial";
 
 interface Class3SectionProps {
   activeTab: string;
@@ -333,7 +330,7 @@ export const Class3Section: React.FC<Class3SectionProps> = ({
   const [selectedAffirmationIdx, setSelectedAffirmationIdx] = useState<number>(0);
   const [personalAffirmation, setPersonalAffirmation] = useState<string>("");
 
-  // Module 3: Sheet PDF page selector (Page 1: 17 strokes / Page 2: 22 strokes)
+  // Sheet PDF page selector (Page 1: 17 strokes / Page 2: 22 strokes)
   const [daikomyoSheetPage, setDaikomyoSheetPage] = useState<1 | 2>(1);
 
   // Module 4: Shinpiden practice selector + Entrenamiento Solar point helper
@@ -353,224 +350,26 @@ export const Class3Section: React.FC<Class3SectionProps> = ({
   const [diplomaName, setDiplomaName] = useState<string>("");
   const [viewingDiploma, setViewingDiploma] = useState<boolean>(false);
 
-  // Videos y Material (YouTube + PDFs + Blog Links)
-  interface C3VideoItem {
-    uid: string;
-    embedId: string;
-    type: "youtube" | "youtube_playlist";
-    title: string;
-    description: string;
-    url: string;
-  }
-
-  interface C3MaterialItem {
-    id: string;
-    kind: "pdf_upload" | "blog_link" | "pdf_link";
-    title: string;
-    description: string;
-    url: string;
-    fileName?: string;
-    fileSizeLabel?: string;
-  }
-
-  const [c3Videos, setC3Videos] = useState<C3VideoItem[]>(() => {
-    try {
-      const saved = localStorage.getItem("reiki_c3_videos");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
+  // Videos y Material seleccionados por la docente (YouTube + PDFs + Blog Links)
+  const c3Videos: ClassVideoItem[] = [];
+  const c3Materials: ClassMaterialItem[] = [
+    {
+      id: "manual-shinpiden-c3",
+      kind: "pdf_upload",
+      title: CLASS3_OFFICIAL_PDF.title,
+      description: `${CLASS3_OFFICIAL_PDF.author} · ${CLASS3_OFFICIAL_PDF.pages}. ${CLASS3_OFFICIAL_PDF.description}`,
+      url: CLASS3_OFFICIAL_PDF.url,
+      fileName: "Manual-Reiki-Nivel-III-Shinpiden-RinconZen.pdf"
+    },
+    {
+      id: "lamina-daikomyo-c3",
+      kind: "pdf_upload",
+      title: CLASS3_DAIKOMYO.symbolSheetPdf.title,
+      description: CLASS3_DAIKOMYO.symbolSheetPdf.subtitle,
+      url: CLASS3_DAIKOMYO.symbolSheetPdf.url,
+      fileName: "Simbolo-Daikomyo-Trazos-RinconZen.pdf"
     }
-  });
-  const [selectedC3VideoUid, setSelectedC3VideoUid] = useState<string>(() => {
-    try {
-      const saved = localStorage.getItem("reiki_c3_videos");
-      const parsed = saved ? JSON.parse(saved) : [];
-      return parsed.length > 0 ? parsed[0].uid : "";
-    } catch {
-      return "";
-    }
-  });
-  const [newVideoTitle, setNewVideoTitle] = useState<string>("");
-  const [newVideoUrl, setNewVideoUrl] = useState<string>("");
-  const [newVideoDesc, setNewVideoDesc] = useState<string>("");
-  const [videoFormError, setVideoFormError] = useState<string>("");
-
-  const [c3Materials, setC3Materials] = useState<C3MaterialItem[]>(() => {
-    try {
-      const saved = localStorage.getItem("reiki_c3_materials");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [newLinkTitle, setNewLinkTitle] = useState<string>("");
-  const [newLinkUrl, setNewLinkUrl] = useState<string>("");
-  const [newLinkDesc, setNewLinkDesc] = useState<string>("");
-  const [newLinkKind, setNewLinkKind] = useState<"blog_link" | "pdf_link">("blog_link");
-  const [materialError, setMaterialError] = useState<string>("");
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("reiki_c3_videos", JSON.stringify(c3Videos));
-    } catch {
-      // ignore storage quota issues
-    }
-  }, [c3Videos]);
-
-  useEffect(() => {
-    try {
-      const persistable = c3Materials.filter((m) => !m.url.startsWith("blob:"));
-      localStorage.setItem("reiki_c3_materials", JSON.stringify(persistable));
-    } catch {
-      // ignore storage quota issues
-    }
-  }, [c3Materials]);
-
-  const parseYouTubeInput = (
-    rawUrl: string
-  ): { embedId: string; type: "youtube" | "youtube_playlist" } | null => {
-    const trimmed = rawUrl.trim();
-    if (!trimmed) return null;
-
-    try {
-      const urlObj = new URL(trimmed.startsWith("http") ? trimmed : `https://${trimmed}`);
-      const listId = urlObj.searchParams.get("list");
-      const vId = urlObj.searchParams.get("v");
-
-      if (listId && !vId) {
-        return { embedId: listId, type: "youtube_playlist" };
-      }
-      if (vId) {
-        return { embedId: vId, type: "youtube" };
-      }
-      if (urlObj.hostname.includes("youtu.be")) {
-        const pathId = urlObj.pathname.replace(/^\//, "").split("/")[0];
-        if (pathId) return { embedId: pathId, type: "youtube" };
-      }
-      if (urlObj.pathname.includes("/embed/") || urlObj.pathname.includes("/shorts/")) {
-        const parts = urlObj.pathname.split("/").filter(Boolean);
-        const last = parts[parts.length - 1];
-        if (last) return { embedId: last, type: "youtube" };
-      }
-      if (listId) {
-        return { embedId: listId, type: "youtube_playlist" };
-      }
-    } catch {
-      if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
-        return { embedId: trimmed, type: "youtube" };
-      }
-    }
-    return null;
-  };
-
-  const handleAddYouTubeVideo = (e: React.FormEvent) => {
-    e.preventDefault();
-    setVideoFormError("");
-    const parsed = parseYouTubeInput(newVideoUrl);
-    if (!parsed) {
-      setVideoFormError("Ingresá un enlace válido de YouTube o playlist.");
-      return;
-    }
-    const uid = `yt-c3-${Date.now()}`;
-    const item: C3VideoItem = {
-      uid,
-      embedId: parsed.embedId,
-      type: parsed.type,
-      title: newVideoTitle.trim() || "Video de YouTube",
-      description: newVideoDesc.trim() || "Material audiovisual complementario para Shinpiden.",
-      url: newVideoUrl.trim().startsWith("http")
-        ? newVideoUrl.trim()
-        : `https://${newVideoUrl.trim()}`
-    };
-    setC3Videos((prev) => [...prev, item]);
-    setSelectedC3VideoUid(uid);
-    setNewVideoTitle("");
-    setNewVideoUrl("");
-    setNewVideoDesc("");
-  };
-
-  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMaterialError("");
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-      setMaterialError("Por favor seleccioná un archivo en formato PDF (.pdf).");
-      e.target.value = "";
-      return;
-    }
-
-    const sizeKB = Math.round(file.size / 1024);
-    const sizeLabel = sizeKB >= 1024 ? `${(sizeKB / 1024).toFixed(1)} MB` : `${sizeKB} KB`;
-    const cleanTitle = file.name.replace(/\.pdf$/i, "");
-
-    if (file.size <= 1.8 * 1024 * 1024) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = typeof reader.result === "string" ? reader.result : "";
-        if (!dataUrl) return;
-        setC3Materials((prev) => [
-          ...prev,
-          {
-            id: `pdf-c3-${Date.now()}`,
-            kind: "pdf_upload",
-            title: cleanTitle,
-            description: "Archivo PDF subido para lectura y descarga.",
-            url: dataUrl,
-            fileName: file.name,
-            fileSizeLabel: sizeLabel
-          }
-        ]);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      const blobUrl = URL.createObjectURL(file);
-      setC3Materials((prev) => [
-        ...prev,
-        {
-          id: `pdf-c3-${Date.now()}`,
-          kind: "pdf_upload",
-          title: cleanTitle,
-          description: "Archivo PDF cargado en esta sesión.",
-          url: blobUrl,
-          fileName: file.name,
-          fileSizeLabel: sizeLabel
-        }
-      ]);
-    }
-    e.target.value = "";
-  };
-
-  const handleAddMaterialLink = (e: React.FormEvent) => {
-    e.preventDefault();
-    setMaterialError("");
-    const trimmedUrl = newLinkUrl.trim();
-    if (!trimmedUrl) {
-      setMaterialError("Ingresá una URL válida.");
-      return;
-    }
-    const normalizedUrl = trimmedUrl.startsWith("http")
-      ? trimmedUrl
-      : `https://${trimmedUrl}`;
-    setC3Materials((prev) => [
-      ...prev,
-      {
-        id: `link-c3-${Date.now()}`,
-        kind: newLinkKind,
-        title:
-          newLinkTitle.trim() ||
-          (newLinkKind === "blog_link" ? "Artículo del Blog" : "Documento PDF"),
-        description:
-          newLinkDesc.trim() ||
-          (newLinkKind === "blog_link"
-            ? "Lectura complementaria en el blog."
-            : "Documento PDF enlazado."),
-        url: normalizedUrl
-      }
-    ]);
-    setNewLinkTitle("");
-    setNewLinkUrl("");
-    setNewLinkDesc("");
-  };
+  ];
 
   const solarPoints = [
     { label: "1. Manos al Cielo", count: "Conexión" },
@@ -595,9 +394,6 @@ export const Class3Section: React.FC<Class3SectionProps> = ({
     0
   );
   const quizPassed = quizScore >= 5;
-
-  const activeVideo =
-    c3Videos.find((v) => v.uid === selectedC3VideoUid) || c3Videos[0] || null;
 
   return (
     <>
@@ -713,7 +509,7 @@ export const Class3Section: React.FC<Class3SectionProps> = ({
               onClick={() => onNavigateTab("c3_sanacion")}
               className="inline-flex items-center space-x-1.5 px-5 py-2.5 bg-natural-primary text-white rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors shadow-sm"
             >
-              <span>Módulo 1: Sanación y Satori</span>
+              <span>Sanación y Satori</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -793,7 +589,7 @@ export const Class3Section: React.FC<Class3SectionProps> = ({
               onClick={() => onNavigateTab("c3_anshin")}
               className="inline-flex items-center space-x-1.5 px-5 py-2.5 bg-natural-primary text-white rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors shadow-sm"
             >
-              <span>Módulo 2: Anshin y Afirmaciones</span>
+              <span>Anshin y Afirmaciones</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -992,7 +788,7 @@ export const Class3Section: React.FC<Class3SectionProps> = ({
               onClick={() => onNavigateTab("c3_daikomyo")}
               className="inline-flex items-center space-x-1.5 px-5 py-2.5 bg-natural-primary text-white rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors shadow-sm"
             >
-              <span>Módulo 3: Daikomyo</span>
+              <span>Daikomyo</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -1197,21 +993,21 @@ export const Class3Section: React.FC<Class3SectionProps> = ({
               onClick={() => onNavigateTab("c3_practicas")}
               className="inline-flex items-center space-x-1.5 px-5 py-2.5 bg-natural-primary text-white rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors shadow-sm"
             >
-              <span>Módulo 4: Prácticas Shinpiden</span>
+              <span>Prácticas Shinpiden</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
       )}
 
-      {/* === C3 MÓDULO 4: PRÁCTICAS Y TÉCNICAS AVANZADAS === */}
+      {/* === C3 PRÁCTICAS Y TÉCNICAS AVANZADAS === */}
       {activeTab === "c3_practicas" && (
         <div className="space-y-6 animate-fade-in">
           <div className="flex items-center justify-between border-b pb-4 border-natural-border">
             <div className="flex items-center gap-3">
               <Activity className="w-6 h-6 text-natural-primary" />
               <h3 className="text-xl sm:text-2xl font-serif text-natural-dark font-bold">
-                Módulo 4: Prácticas y Técnicas Avanzadas de Shinpiden
+                Prácticas y Técnicas Avanzadas de Shinpiden
               </h3>
             </div>
             <span className="text-[10px] px-2.5 py-0.5 bg-natural-cream text-natural-primary rounded-md uppercase tracking-wider font-mono font-semibold">
@@ -1375,415 +1171,18 @@ export const Class3Section: React.FC<Class3SectionProps> = ({
         </div>
       )}
 
-      {/* === C3 VIDEOS Y MATERIAL (YOUTUBE, MANUAL PDF Y BLOG) === */}
+      {/* === C3 VIDEOS Y MATERIAL === */}
       {activeTab === "c3_videos" && (
-        <div className="space-y-8 animate-fade-in">
-          <div className="flex items-center justify-between border-b pb-4 border-natural-border">
-            <div className="flex items-center gap-3">
-              <Video className="w-6 h-6 text-natural-primary" />
-              <h3 className="text-xl sm:text-2xl font-serif text-natural-dark font-bold">
-                Videos y Material de Shinpiden
-              </h3>
-            </div>
-            <span className="text-[10px] px-2.5 py-0.5 bg-natural-cream text-natural-primary rounded-md uppercase tracking-wider font-mono font-semibold">
-              Manual PDF, YouTube y Blog
-            </span>
-          </div>
-
-          <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
-            <Clock className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-900 leading-relaxed font-medium">
-              Esta sección está pendiente de ampliación: en breve se irá subiendo más material audiovisual, lecturas y recursos de Shinpiden. Mientras tanto, podés descargar el manual complementario y la lámina de trazos de Daikomyo acá abajo, o sumar tus propios videos de YouTube, PDFs y notas del blog.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Reproductor + Manual Oficial + Materiales */}
-            <div className="lg:col-span-2 space-y-6">
-              {activeVideo ? (
-                <div className="space-y-4">
-                  <div className="relative pt-[56.25%] bg-black rounded-2xl overflow-hidden shadow-md border border-natural-border">
-                    <iframe
-                      src={
-                        activeVideo.type === "youtube_playlist"
-                          ? `https://www.youtube.com/embed/videoseries?list=${activeVideo.embedId}`
-                          : `https://www.youtube.com/embed/${activeVideo.embedId}`
-                      }
-                      title={activeVideo.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="absolute inset-0 w-full h-full border-0"
-                    />
-                  </div>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h4 className="font-serif text-base font-bold text-natural-dark">
-                        {activeVideo.title}
-                      </h4>
-                      <p className="text-xs text-natural-text-muted mt-1 leading-relaxed">
-                        {activeVideo.description}
-                      </p>
-                    </div>
-                    <a
-                      href={activeVideo.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-natural-primary hover:underline shrink-0"
-                    >
-                      <span>Abrir en YouTube</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                </div>
-              ) : (
-                <div className="h-56 bg-natural-cream/40 rounded-2xl border border-dashed border-natural-border flex flex-col items-center justify-center p-6 text-center space-y-2">
-                  <Youtube className="w-10 h-10 text-natural-primary/40" />
-                  <p className="text-xs text-natural-text-muted font-medium">
-                    Todavía no cargaste videos en esta clase. Pegá una URL de YouTube en el panel lateral para reproducirla acá.
-                  </p>
-                </div>
-              )}
-
-              {/* Lista de Videos Guardados */}
-              {c3Videos.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border">
-                    Lista de Videos ({c3Videos.length})
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {c3Videos.map((vid) => (
-                      <div
-                        key={vid.uid}
-                        className={`p-3.5 rounded-2xl border transition-all flex items-start justify-between gap-2 ${
-                          activeVideo?.uid === vid.uid
-                            ? "bg-natural-secondary/15 border-natural-primary shadow-xs"
-                            : "bg-white border-natural-border hover:bg-natural-eggshell"
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setSelectedC3VideoUid(vid.uid)}
-                          className="text-left flex-1 min-w-0"
-                        >
-                          <p className="text-xs font-bold text-natural-dark truncate">
-                            {vid.title}
-                          </p>
-                          <p className="text-[11px] text-natural-text-muted line-clamp-1 mt-0.5">
-                            {vid.description}
-                          </p>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const next = c3Videos.filter((v) => v.uid !== vid.uid);
-                            setC3Videos(next);
-                            if (selectedC3VideoUid === vid.uid) {
-                              setSelectedC3VideoUid(next[0]?.uid || "");
-                            }
-                          }}
-                          aria-label="Quitar video"
-                          className="text-natural-text-muted hover:text-red-600 p-1 transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Manual Oficial + PDFs y Links al Blog */}
-              <div className="space-y-3 pt-2">
-                <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-natural-primary" />
-                  <span>Material de Estudio, Láminas PDF y Notas del Blog</span>
-                </h4>
-
-                {/* Manual PDF oficial incorporado */}
-                <div className="bg-[#f5f2e9] p-4 rounded-2xl border border-[#e8e4d8] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-3xs">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2.5 bg-white rounded-xl text-natural-primary shrink-0 border border-natural-border/60">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-mono uppercase font-bold tracking-wider text-natural-primary">
-                        {CLASS3_OFFICIAL_PDF.author} · {CLASS3_OFFICIAL_PDF.pages}
-                      </span>
-                      <h5 className="text-xs font-bold text-natural-dark">
-                        {CLASS3_OFFICIAL_PDF.title}
-                      </h5>
-                      <p className="text-[11px] text-natural-text-muted mt-0.5 leading-relaxed">
-                        {CLASS3_OFFICIAL_PDF.description}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <a
-                      href={CLASS3_OFFICIAL_PDF.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-natural-border text-natural-dark hover:bg-natural-cream rounded-xl text-xs font-semibold transition-colors"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>Abrir</span>
-                    </a>
-                    <a
-                      href={CLASS3_OFFICIAL_PDF.url}
-                      download="Manual-Reiki-Nivel-III-Shinpiden-RinconZen.pdf"
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-natural-primary text-white hover:bg-natural-primary/95 rounded-xl text-xs font-semibold transition-colors"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Descargar PDF</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* Lámina de trazos del Símbolo Daikomyo */}
-                <div className="bg-[#f5f2e9] p-4 rounded-2xl border border-[#e8e4d8] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-3xs">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2.5 bg-white rounded-xl text-natural-primary shrink-0 border border-natural-border/60">
-                      <Flame className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-mono uppercase font-bold tracking-wider text-natural-primary">
-                        Símbolo Maestro · 2 páginas
-                      </span>
-                      <h5 className="text-xs font-bold text-natural-dark">
-                        {CLASS3_DAIKOMYO.symbolSheetPdf.title}
-                      </h5>
-                      <p className="text-[11px] text-natural-text-muted mt-0.5 leading-relaxed">
-                        {CLASS3_DAIKOMYO.symbolSheetPdf.subtitle}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <a
-                      href={CLASS3_DAIKOMYO.symbolSheetPdf.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-natural-border text-natural-dark hover:bg-natural-cream rounded-xl text-xs font-semibold transition-colors"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>Abrir</span>
-                    </a>
-                    <a
-                      href={CLASS3_DAIKOMYO.symbolSheetPdf.url}
-                      download="Simbolo-Daikomyo-Trazos-RinconZen.pdf"
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-natural-primary text-white hover:bg-natural-primary/95 rounded-xl text-xs font-semibold transition-colors"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Descargar PDF</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* Materiales agregados por el usuario */}
-                <div className="grid grid-cols-1 gap-3">
-                  {c3Materials.map((mat) => (
-                    <div
-                      key={mat.id}
-                      className="bg-white p-4 rounded-2xl border border-natural-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-3xs"
-                    >
-                      <div className="flex items-start gap-3 min-w-0">
-                        <div className="p-2.5 bg-natural-cream/60 rounded-xl text-natural-primary shrink-0">
-                          {mat.kind === "blog_link" ? (
-                            <BookOpen className="w-5 h-5" />
-                          ) : (
-                            <FileText className="w-5 h-5" />
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded bg-natural-eggshell text-natural-primary">
-                              {mat.kind === "blog_link"
-                                ? "Blog"
-                                : mat.kind === "pdf_upload"
-                                ? `PDF ${mat.fileSizeLabel || ""}`
-                                : "PDF Externo"}
-                            </span>
-                            <h5 className="text-xs font-bold text-natural-dark truncate">
-                              {mat.title}
-                            </h5>
-                          </div>
-                          <p className="text-[11px] text-natural-text-muted mt-0.5 leading-relaxed">
-                            {mat.description}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        {mat.kind === "pdf_upload" ? (
-                          <a
-                            href={mat.url}
-                            download={mat.fileName || `${mat.title}.pdf`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-natural-primary text-white rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                            <span>Descargar</span>
-                          </a>
-                        ) : (
-                          <a
-                            href={mat.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-natural-primary text-white rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>Abrir</span>
-                          </a>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setC3Materials((prev) => prev.filter((m) => m.id !== mat.id))
-                          }
-                          aria-label="Eliminar material"
-                          className="p-2 rounded-xl bg-natural-cream hover:bg-red-50 text-natural-text-muted hover:text-red-600 transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Columna derecha: Formularios para YouTube, subir PDF y links del blog */}
-            <div className="space-y-5">
-              <div className="bg-white p-5 rounded-3xl border border-natural-border shadow-3xs space-y-4">
-                <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border flex items-center gap-1.5">
-                  <Youtube className="w-4 h-4 text-natural-primary" />
-                  <span>Cargar Video de YouTube</span>
-                </h4>
-                <form onSubmit={handleAddYouTubeVideo} className="space-y-2.5">
-                  <input
-                    type="text"
-                    value={newVideoTitle}
-                    onChange={(e) => setNewVideoTitle(e.target.value)}
-                    placeholder="Título del video o práctica..."
-                    className="w-full p-2 rounded-xl border border-natural-border bg-natural-bg text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  <input
-                    type="text"
-                    value={newVideoUrl}
-                    onChange={(e) => setNewVideoUrl(e.target.value)}
-                    placeholder="URL de YouTube (watch?v=... o list=...)"
-                    className="w-full p-2 rounded-xl border border-natural-border bg-natural-bg text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  <input
-                    type="text"
-                    value={newVideoDesc}
-                    onChange={(e) => setNewVideoDesc(e.target.value)}
-                    placeholder="Breve descripción (opcional)"
-                    className="w-full p-2 rounded-xl border border-natural-border bg-natural-bg text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  {videoFormError && (
-                    <p className="text-[11px] text-red-600">{videoFormError}</p>
-                  )}
-                  <button
-                    type="submit"
-                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-natural-primary text-white rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Agregar Video</span>
-                  </button>
-                </form>
-              </div>
-
-              <div className="bg-gradient-to-b from-natural-cream/80 to-natural-sand/50 p-5 rounded-3xl border border-natural-border shadow-3xs space-y-4">
-                <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border/60 flex items-center gap-1.5">
-                  <Upload className="w-4 h-4 text-natural-primary" />
-                  <span>Subir PDF o Link al Blog</span>
-                </h4>
-
-                <label className="flex flex-col items-center justify-center gap-1.5 p-4 rounded-2xl border-2 border-dashed border-natural-primary/35 bg-white/80 hover:bg-white cursor-pointer transition-colors text-center">
-                  <Upload className="w-5 h-5 text-natural-primary" />
-                  <span className="text-xs font-semibold text-natural-dark">
-                    Subir archivo PDF
-                  </span>
-                  <span className="text-[10px] text-natural-text-muted">
-                    Seleccioná un documento .pdf desde tu dispositivo
-                  </span>
-                  <input
-                    type="file"
-                    accept="application/pdf,.pdf"
-                    onChange={handlePdfUpload}
-                    className="hidden"
-                  />
-                </label>
-
-                <form
-                  onSubmit={handleAddMaterialLink}
-                  className="space-y-2.5 pt-2 border-t border-natural-border/60"
-                >
-                  <p className="text-[10px] font-mono uppercase font-bold text-natural-primary flex items-center gap-1">
-                    <LinkIcon className="w-3 h-3" />
-                    <span>Agregar enlace al blog o PDF</span>
-                  </p>
-                  <select
-                    value={newLinkKind}
-                    onChange={(e) =>
-                      setNewLinkKind(e.target.value as "blog_link" | "pdf_link")
-                    }
-                    className="w-full p-2 rounded-xl border border-natural-border bg-white text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  >
-                    <option value="blog_link">Link al Blog / Artículo</option>
-                    <option value="pdf_link">Enlace externo a PDF (Drive / web)</option>
-                  </select>
-                  <input
-                    type="text"
-                    value={newLinkTitle}
-                    onChange={(e) => setNewLinkTitle(e.target.value)}
-                    placeholder="Título del artículo o PDF..."
-                    className="w-full p-2 rounded-xl border border-natural-border bg-white text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  <input
-                    type="text"
-                    value={newLinkUrl}
-                    onChange={(e) => setNewLinkUrl(e.target.value)}
-                    placeholder="https://www.rinconzen.com.ar/..."
-                    className="w-full p-2 rounded-xl border border-natural-border bg-white text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  <input
-                    type="text"
-                    value={newLinkDesc}
-                    onChange={(e) => setNewLinkDesc(e.target.value)}
-                    placeholder="Nota breve (opcional)"
-                    className="w-full p-2 rounded-xl border border-natural-border bg-white text-xs text-natural-dark focus:outline-none focus:border-natural-primary"
-                  />
-                  {materialError && (
-                    <p className="text-[11px] text-red-600">{materialError}</p>
-                  )}
-                  <button
-                    type="submit"
-                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-natural-dark text-white rounded-xl text-xs font-semibold hover:bg-natural-dark/90 transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Guardar Enlace</span>
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center pt-4 border-t border-natural-border">
-            <button
-              onClick={() => onNavigateTab("c3_practicas")}
-              className="inline-flex items-center space-x-1 px-4 py-2 bg-natural-cream hover:bg-natural-sand rounded-xl text-xs font-semibold text-natural-dark transition shadow-2xs"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              <span>Volver</span>
-            </button>
-            <button
-              onClick={() => onNavigateTab("c3_evaluacion")}
-              className="inline-flex items-center space-x-1.5 px-5 py-2.5 bg-natural-primary text-white rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors shadow-sm"
-            >
-              <span>Evaluación y Juegos</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
+        <ClassVideosMaterial
+          classTitle="Clase III"
+          badge="Sintonía Audiovisual"
+          introText="Acompañá tu estudio de Shinpiden con los recursos audiovisuales, manuales en PDF y lecturas seleccionadas para la Clase III."
+          defaultVideos={c3Videos}
+          defaultMaterials={c3Materials}
+          onBack={() => onNavigateTab("c3_practicas")}
+          onNext={() => onNavigateTab("c3_evaluacion")}
+          nextLabel="Evaluación y Juegos"
+        />
       )}
 
       {/* === C3 EVALUACIÓN: JUEGOS INTERACTIVOS, DIPLOMA Y CIERRE === */}
@@ -2109,7 +1508,7 @@ export const Class3Section: React.FC<Class3SectionProps> = ({
                 ) : (
                   <div className="space-y-6">
                     <p className="text-xs text-natural-text-muted leading-relaxed">
-                      Respondé las siguientes 6 preguntas sobre los módulos de la Clase III (Shinpiden):
+                      Respondé las siguientes 6 preguntas sobre los contenidos de la Clase III (Shinpiden):
                     </p>
 
                     <div className="space-y-6">
