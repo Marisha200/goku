@@ -81,6 +81,13 @@ import { CLASS4_HERO } from "./data/class4Content";
 import { Class4Section } from "./components/Class4Section";
 import { CLASS5_HERO } from "./data/class5Content";
 import { Class5Section } from "./components/Class5Section";
+import { CLASS6_HERO } from "./data/class6Content";
+import { Class6Section } from "./components/Class6Section";
+import {
+  ClassVideosMaterial,
+  ClassVideoItem,
+  ClassMaterialItem
+} from "./components/ClassVideosMaterial";
 
 import choKuReiImg from "./assets/images/CKR.png";
 import seiHeKiImg from "./assets/images/SHK.png";
@@ -92,90 +99,70 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [kanjiSubTab, setKanjiSubTab] = useState<string>("origen");
 
-  // Videos oficiales estables cargados directamente en el código para los alumnos de Rincón Zen
-  const [customVideos] = useState<{ id: string; title: string; description: string; url: string; type?: "youtube" | "vimeo" | "youtube_playlist" }[]>(() => {
-    return [
-      {
-        id: "PL0g9expKbVYIsIq5LNskW-C44imC4sdvS",
-        type: "youtube_playlist",
-        title: "La verdadera historia de Reiki",
-        description: "Serie de videos (playlist) sobre los orígenes, verdad histórica y linaje directo de Mikao Usui.",
-        url: "https://www.youtube.com/watch?v=8F1tIfEnh-8&list=PL0g9expKbVYIsIq5LNskW-C44imC4sdvS&index=1"
-      },
-      {
-        id: "96606036",
-        type: "vimeo",
-        title: "Byosen con Frank Arjava Petter",
-        description: "No te olvides de hacer click en CC para verlo en español.",
-        url: "https://vimeo.com/96606036"
-      }
-    ];
-  });
+  const defaultVideosClass1: ClassVideoItem[] = [
+    {
+      uid: "PL0g9expKbVYIsIq5LNskW-C44imC4sdvS",
+      embedId: "PL0g9expKbVYIsIq5LNskW-C44imC4sdvS",
+      type: "youtube_playlist",
+      title: "La verdadera historia de Reiki",
+      description: "Serie de videos (playlist) sobre los orígenes, verdad histórica y linaje directo de Mikao Usui.",
+      url: "https://www.youtube.com/watch?v=8F1tIfEnh-8&list=PL0g9expKbVYIsIq5LNskW-C44imC4sdvS&index=1"
+    },
+    {
+      uid: "96606036",
+      embedId: "96606036",
+      type: "vimeo",
+      title: "Byosen con Frank Arjava Petter",
+      description: "No te olvides de hacer click en CC para verlo en español.",
+      url: "https://vimeo.com/96606036"
+    }
+  ];
 
-  // =========================================================================
-  // DOCUMENTOS Y MANUALES PDF DESCARGABLES (DESDE GOOGLE DRIVE)
-  // Reemplaza los enlaces de "url" con tus URLs reales de Google Drive.
-  // Cualquier alumno podrá hacer clic en "Descargar" y obtener el documento.
-  // =========================================================================
-  const [downloadableDocs] = useState<{ id: string; title: string; description: string; url: string }[]>(() => {
-    return [
-      {
-        id: "influencias-en-reiki",
-        title: "Influencias en Reiki",
-        description: "Material de estudio sobre las influencias en Reiki Tradicional Japonés.",
-        url: "https://drive.google.com/file/d/1ofv5hI9S7fvRXsya0yDgF3k_UgF51fQd/view?usp=sharing"
-      }
-      // =========================================================================
-      // ¡APRENDE A AGREGAR MÁS DOCUMENTOS DE GOOGLE DRIVE AQUÍ! ✨
-      // =========================================================================
-      // En React/TypeScript, cada documento nuevo debe escribirse entre llaves { ... }
-      // y estar separado del documento anterior por una COMA ( , ).
-      //
-      // Para ACTIVAR el documento que ocultamos abajo, solo quita el "/*" de arriba y el "*/" del final.
-      //
-      // Para AGREGAR un nuevo documento:
-      // Copia el formato de abajo, pon una coma después del de arriba, y reemplaza los textos y la URL de Google Drive.
-      // (Asegúrate de que en Google Drive el documento esté compartido como "Cualquier persona con el enlace puede ver").
-      /*
-      ,
-      {
-        id: "simbolos-sagrados-maestria",
-        title: "Símbolos y Kotodamas de Cuarto Nivel",
-        description: "Trazado formal, significado trascendental, activación y meditación activa de sintonías.",
-        url: "https://drive.google.com/file/d/1_REEMPLAZAR_CON_OTRO_ID_DE_DRIVE_SI_QUISIERAS/view?usp=sharing"
-      }
-      */
-    ];
-  });
+  const defaultMaterialsClass1: ClassMaterialItem[] = [
+    {
+      id: "influencias-en-reiki",
+      kind: "pdf_link",
+      title: "Influencias en Reiki",
+      description: "Material de estudio sobre las influencias en Reiki Tradicional Japonés.",
+      url: "https://drive.google.com/file/d/1ofv5hI9S7fvRXsya0yDgF3k_UgF51fQd/view?usp=sharing"
+    },
+    {
+      id: "egregor-blog-c1",
+      kind: "blog_link",
+      title: "¿Qué es un Egregor? La energía invisible que también nos habita",
+      description: "Descubrí cómo los pensamientos y emociones colectivas crean corrientes energéticas y cómo influyen en nuestra vibración cotidiana.",
+      url: "https://www.rinconzen.com.ar/post/qu%C3%A9-es-un-egregor-la-energ%C3%ADa-invisible-que-tambi%C3%A9n-nos-habita"
+    }
+  ];
 
-  const [selectedVideoId, setSelectedVideoId] = useState<string>("PL0g9expKbVYIsIq5LNskW-C44imC4sdvS");
+  const defaultVideosClass2: ClassVideoItem[] = [
+    {
+      uid: "PLzBwNj_gSsync8ZABWy4JR-wRIbMem7uq",
+      embedId: "PLzBwNj_gSsync8ZABWy4JR-wRIbMem7uq",
+      type: "youtube_playlist",
+      title: "Introducción al Tao",
+      description: "Lista de reproducción de Introducción al Tao para complementar las bases filosóficas y espirituales de la Clase II.",
+      url: "https://www.youtube.com/watch?v=ao-drCtJUeo&list=PLzBwNj_gSsync8ZABWy4JR-wRIbMem7uq"
+    },
+    {
+      uid: "XMf3bciOKn4",
+      embedId: "XMf3bciOKn4",
+      type: "youtube",
+      title: "Órbita Microcósmica",
+      description: "Práctica y meditación guiada de la circulación de energía en la Órbita Microcósmica.",
+      url: "https://www.youtube.com/watch?v=XMf3bciOKn4"
+    }
+  ];
 
-  // Videos oficiales para la Clase II
-  const [customVideos2] = useState<{ id: string; title: string; description: string; url: string; type?: "youtube" | "vimeo" | "youtube_playlist" }[]>(() => {
-    return [
-      {
-        id: "PLzBwNj_gSsync8ZABWy4JR-wRIbMem7uq",
-        type: "youtube_playlist",
-        title: "Introducción al Tao",
-        description: "Lista de reproducción de Introducción al Tao para complementar las bases filosóficas y espirituales del Nivel II.",
-        url: "https://www.youtube.com/watch?v=ao-drCtJUeo&list=PLzBwNj_gSsync8ZABWy4JR-wRIbMem7uq"
-      },
-      {
-        id: "XMf3bciOKn4",
-        type: "youtube",
-        title: "Órbita Microcósmica",
-        description: "Práctica y meditación guiada de la circulación de energía en la Órbita Microcósmica.",
-        url: "https://www.youtube.com/watch?v=XMf3bciOKn4"
-      }
-    ];
-  });
-
-  // Documentos y Manuales PDF para la Clase II
-  const [downloadableDocs2] = useState<{ id: string; title: string; description: string; url: string }[]>(() => {
-    return [];
-  });
-
-  const [selectedVideoId2, setSelectedVideoId2] = useState<string>("PLzBwNj_gSsync8ZABWy4JR-wRIbMem7uq");
+  const defaultMaterialsClass2: ClassMaterialItem[] = [
+    {
+      id: "egregor-blog-c2",
+      kind: "blog_link",
+      title: "¿Qué es un Egregor? La energía invisible que también nos habita",
+      description: "Descubrí cómo los pensamientos y emociones colectivas crean corrientes energéticas y cómo influyen en nuestra vibración cotidiana.",
+      url: "https://www.rinconzen.com.ar/post/qu%C3%A9-es-un-egregor-la-energ%C3%ADa-invisible-que-tambi%C3%A9n-nos-habita"
+    }
+  ];
 
   // Class Selection States
   const [selectedClass, setSelectedClass] = useState<number>(0);
@@ -409,7 +396,7 @@ export default function App() {
     { id: "principios", label: "El Gokai (Principios)", icon: Sun },
     { id: "aspectos", label: "La Maestría Interna", icon: Compass },
     { id: "sensibilidad", label: "Byosen y Hibiki", icon: Activity },
-    { id: "videos", label: "Videos de Práctica", icon: Video },
+    { id: "videos", label: "Videos y Material", icon: Video },
     { id: "test", label: "Test Evaluativo", icon: Award },
     { id: "roadmap", label: "Progreso y Futuro", icon: BookOpen }
   ];
@@ -456,16 +443,20 @@ export default function App() {
   ];
 
   const menuItems6 = [
-    { id: "c6_bienvenida", label: "Inicio", icon: Flower2 },
-    { id: "c6_enkaku", label: "Técnicas Distancia", icon: Send },
-    { id: "c6_ancestros", label: "Línea Ancestral", icon: Users },
-    { id: "c6_mandalas", label: "Rejilla de Cristales", icon: Grid }
+    { id: "c6_inicio", label: "Inicio", icon: Flower2 },
+    { id: "c6_autoridad", label: "Autoridad del Maestro", icon: ShieldAlert },
+    { id: "c6_etica", label: "Ética en la Práctica", icon: BookOpen },
+    { id: "c6_discernimiento", label: "Discernimiento Crítico", icon: Compass },
+    { id: "c6_dificil", label: "Situaciones Difíciles", icon: Activity },
+    { id: "c6_videos", label: "Videos y Material", icon: Video },
+    { id: "c6_juegos", label: "Juegos Evaluativos", icon: Award }
   ];
 
   const menuItems7 = [
     { id: "c7_bienvenida", label: "Inicio", icon: Flower2 },
     { id: "c7_shihan", label: "El Rol del Shihan", icon: Award },
     { id: "c7_ensenar", label: "Pedagogía Reiki", icon: GraduationCap },
+    { id: "c7_videos", label: "Videos y Material", icon: Video },
     { id: "c7_graduacion", label: "Grado de Maestro", icon: Award }
   ];
 
@@ -504,8 +495,8 @@ export default function App() {
       setActiveTab("c5_inicio");
       markAsRead("c5_inicio");
     } else if (classNum === 6) {
-      setActiveTab("c6_bienvenida");
-      markAsRead("c6_bienvenida");
+      setActiveTab("c6_inicio");
+      markAsRead("c6_inicio");
     } else if (classNum === 7) {
       setActiveTab("c7_bienvenida");
       markAsRead("c7_bienvenida");
@@ -605,7 +596,7 @@ export default function App() {
               { id: 6, label: "Clase VI" },
               { id: 7, label: "Clase VII" }
             ].map((clase) => {
-              const isLocked = clase.id >= 6;
+              const isLocked = clase.id >= 7;
               const isActive = selectedClass === clase.id;
 
               if (isLocked) {
@@ -682,7 +673,7 @@ export default function App() {
                 { id: 6, label: "Clase VI" },
                 { id: 7, label: "Clase VII" }
               ].map((clase) => {
-                const isLocked = clase.id >= 6;
+                const isLocked = clase.id >= 7;
                 const isActive = selectedClass === clase.id;
 
                 if (isLocked) {
@@ -732,7 +723,7 @@ export default function App() {
               {selectedClass === 3 && CLASS3_HERO.title}
               {selectedClass === 4 && CLASS4_HERO.title}
               {selectedClass === 5 && CLASS5_HERO.title}
-              {selectedClass === 6 && "Clase VI: Sanación Distante y Ancestral"}
+              {selectedClass === 6 && CLASS6_HERO.title}
               {selectedClass === 7 && "Clase VII: El Grado del Shihan (Maestro)"}
             </h2>
             <p className="mt-2 text-natural-text-muted text-sm sm:text-base italic max-w-xl mx-auto leading-relaxed">
@@ -741,7 +732,7 @@ export default function App() {
               {selectedClass === 3 && `“${CLASS3_HERO.quote}”`}
               {selectedClass === 4 && `“${CLASS4_HERO.quote}”`}
               {selectedClass === 5 && `“${CLASS5_HERO.quote}”`}
-              {selectedClass === 6 && "“La sanación cuántica generacional de los ancestros y la activación continua de la Rejilla de Cristales sagrada.”"}
+              {selectedClass === 6 && `“${CLASS6_HERO.quote}”`}
               {selectedClass === 7 && "“El compromiso último con la pureza, la compasión, la ética de la enseñanza y el diploma oficial de graduación.”"}
             </p>
           </div>
@@ -950,34 +941,32 @@ export default function App() {
                   </div>
                 </button>
 
-                {/* Card 6 (Locked) */}
-                <div 
-                  className="bg-[#faf9fa]/80 p-6 rounded-3xl border border-dashed border-gray-200 text-gray-500 flex flex-col justify-between h-auto min-h-[19.5rem] shadow-3xs relative overflow-hidden group"
+                {/* Card 6 */}
+                <button 
+                  onClick={() => changeClass(6)}
+                  className="text-left bg-white p-6 rounded-3xl border border-natural-border hover:border-natural-primary/50 hover:shadow-2xs transition-all duration-300 group flex flex-col justify-between h-64 cursor-pointer"
                 >
-                  <div className="absolute top-4 right-4 text-gray-400">
-                    <Lock className="w-4 h-4" />
-                  </div>
                   <div>
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="p-2.5 rounded-2xl bg-gray-100 text-gray-400">
-                        <Grid className="w-5 h-5" />
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="p-3 rounded-2xl bg-natural-sand text-natural-primary group-hover:bg-natural-primary group-hover:text-white transition-all">
+                        <ShieldAlert className="w-6 h-6" />
                       </div>
-                      <span className="text-[9px] uppercase font-mono font-bold tracking-widest px-2 py-0.5 bg-gray-100 text-gray-400 rounded-full flex items-center gap-1">
-                        <Lock className="w-2.5 h-2.5" /> Bloqueado
+                      <span className="text-[10px] uppercase font-mono font-bold tracking-widest px-2.5 py-1 bg-[#eef6f0] text-[#3e7256] rounded-full">
+                        Disponible
                       </span>
                     </div>
-                    <h4 className="font-serif text-sm font-bold text-gray-400">
-                      Clase VI
+                    <h4 className="font-serif text-base font-bold text-natural-dark group-hover:text-natural-primary transition-colors">
+                      Clase VI: El Maestro y su Responsabilidad
                     </h4>
-                    <div className="mt-3 p-4 bg-white border border-gray-150 rounded-2xl text-xs sm:text-sm lg:text-[15px] italic text-natural-dark font-medium leading-relaxed font-sans shadow-3xs relative select-text cursor-text">
-                      &ldquo;Tenés poder sobre tu mente, no sobre los acontecimientos externos.&rdquo;
-                      <div className="text-right text-[11px] font-bold text-natural-primary mt-2">— Marco Aurelio, Meditaciones</div>
-                    </div>
+                    <p className="text-xs text-natural-text-muted mt-2 leading-relaxed line-clamp-3">
+                      Ética, consentimiento, autoridad con humildad, discernimiento crítico, manejo de situaciones difíciles y evaluación práctica.
+                    </p>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 pt-3 mt-auto border-t border-gray-100/60 w-full">
-                    <span>Módulo por definir</span>
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-natural-primary pt-4 mt-auto border-t border-natural-border/40 w-full">
+                    <span>Ingresar a Clase VI</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
-                </div>
+                </button>
 
                 {/* Card 7 (Locked) */}
                 <div 
@@ -1004,7 +993,7 @@ export default function App() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 pt-3 mt-auto border-t border-gray-100/60 w-full">
-                    <span>Módulo por definir</span>
+                    <span>Contenido por definir</span>
                   </div>
                 </div>
               </div>
@@ -1077,12 +1066,14 @@ export default function App() {
                   ? "Recorré los fundamentos de Shinpiden, Anshin Ritsumei, el símbolo Daikomyo con sus trazos y las prácticas guiadas para completar la evaluación de Clase III."
                   : selectedClass === 4
                   ? "Recorre la presencia, Mushin y Shoshin, el Hara, Byosen sin interpretación y la escucha consciente para completar la evaluación de Clase IV."
-                  : "Recorré el aprendizaje adulto, el arte de explicar en cinco pasos, las dinámicas prácticas y la coordinación grupal para completar la evaluación de Clase V."}
+                  : selectedClass === 5
+                  ? "Recorré el aprendizaje adulto, el arte de explicar en cinco pasos, las dinámicas prácticas y la coordinación grupal para completar la evaluación de Clase V."
+                  : "Recorré la autoridad pedagógica, la ética y el consentimiento, el discernimiento crítico y la acción responsable para completar la evaluación de Clase VI."}
               </p>
               
               <div className="space-y-1.5">
                 <div className="flex justify-between text-[11px] text-natural-text-muted/80 font-mono">
-                  <span>Módulos vistos:</span>
+                  <span>Secciones vistas:</span>
                   <span>{menuItems.filter(item => readSections[item.id]).length} de {menuItems.length}</span>
                 </div>
                 <div className="w-full bg-natural-border/60 rounded-full h-1.5 overflow-hidden">
@@ -1969,7 +1960,7 @@ export default function App() {
                             <div className="text-natural-secondary select-none text-2xl font-serif">● ✦ ●</div>
 
                             <p className="text-xs text-[#6B5A42] font-sans tracking-wide italic leading-relaxed">
-                              Por cuanto ha aprobado de manera sobresaliente el módulo de principios, kanji y Byosen Reikan Ho correspondientes a la
+                              Por cuanto ha aprobado de manera sobresaliente el recorrido de principios, kanji y Byosen Reikan Ho correspondientes a la
                             </p>
 
                             <h3 className="text-xl sm:text-2xl font-serif text-natural-dark font-bold italic tracking-tight">
@@ -2083,254 +2074,31 @@ export default function App() {
                       }}
                       className="inline-flex items-center space-x-1.5 px-5 py-2.5 bg-natural-primary text-natural-bg rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors shadow-sm"
                     >
-                      <span>Videos de Práctica</span>
+                      <span>Videos y Material</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* === TABS 7: VIDEOS DE PRÁCTICA === */}
+              {/* === TABS 7: VIDEOS Y MATERIAL (CLASE I) === */}
               {activeTab === "videos" && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between border-b pb-4 border-natural-border">
-                    <div className="flex items-center gap-3">
-                      <Video className="w-6 h-6 text-natural-primary" />
-                      <h3 className="text-xl sm:text-2xl font-serif text-natural-dark font-bold">
-                        Videos y Material en PDF 
-                      </h3>
-                    </div>
-                    <span className="text-[10px] px-2.5 py-0.5 bg-natural-cream text-natural-primary rounded-md uppercase tracking-wider font-mono font-semibold">
-                      Sintonía Audiovisual
-                    </span>
-                  </div>
-
-                  <p className="text-natural-text-muted text-sm leading-relaxed">
-                    Acompañá tu instrucción teórica con recursos audiovisuales. Visualizá las listas de reproducción recomendadas y videos demostrativos seleccionados para tu formación de Gokuikaiden.
-                  </p>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left/Middle Column: Player & Active Video info */}
-                    <div className="lg:col-span-2 space-y-4">
-                      {selectedVideoId ? (
-                        <div className="bg-white p-4 rounded-3xl border border-natural-border shadow-3xs overflow-hidden">
-                          <div className="aspect-video w-full rounded-2xl overflow-hidden border border-natural-border bg-black">
-                            {customVideos.find(v => v.id === selectedVideoId)?.type === "vimeo" ? (
-                              <iframe
-                                className="w-full h-full"
-                                src={`https://player.vimeo.com/video/${selectedVideoId}`}
-                                title="Reproductor de Rincón Zen (Vimeo)"
-                                frameBorder="0"
-                                allow="autoplay; fullscreen; picture-in-picture"
-                                allowFullScreen
-                              ></iframe>
-                            ) : customVideos.find(v => v.id === selectedVideoId)?.type === "youtube_playlist" ? (
-                              <iframe
-                                className="w-full h-full"
-                                src={`https://www.youtube.com/embed/videoseries?list=${selectedVideoId}`}
-                                title="Reproductor de Rincón Zen (Playlist de YouTube)"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                              ></iframe>
-                            ) : (
-                              <iframe
-                                className="w-full h-full"
-                                src={`https://www.youtube.com/embed/${selectedVideoId}`}
-                                title="Reproductor de Rincón Zen (YouTube)"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                              ></iframe>
-                            )}
-                          </div>
-                          
-                          {/* Selected Video Details */}
-                          {customVideos.find(v => v.id === selectedVideoId) && (
-                            <div className="mt-4">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-serif text-base text-natural-dark font-bold">
-                                  {customVideos.find(v => v.id === selectedVideoId)?.title}
-                                </span>
-                                <span className={`text-[9px] px-2 py-0.5 rounded font-mono font-bold uppercase ${
-                                  customVideos.find(v => v.id === selectedVideoId)?.type === "vimeo"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : customVideos.find(v => v.id === selectedVideoId)?.type === "youtube_playlist"
-                                    ? "bg-purple-100 text-purple-700"
-                                    : "bg-red-100 text-red-700"
-                                }`}>
-                                  {customVideos.find(v => v.id === selectedVideoId)?.type === "vimeo" 
-                                    ? "Vimeo" 
-                                    : customVideos.find(v => v.id === selectedVideoId)?.type === "youtube_playlist"
-                                    ? "Playlist de YouTube"
-                                    : "YouTube Video"}
-                                </span>
-                              </div>
-                              <p className="text-xs text-natural-text-muted leading-relaxed whitespace-pre-line">
-                                {customVideos.find(v => v.id === selectedVideoId)?.description}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="bg-natural-sand/30 border border-dashed border-natural-border p-12 text-center rounded-3xl">
-                          <Video className="w-12 h-12 text-natural-primary/40 mx-auto mb-3" />
-                          <p className="text-sm text-natural-text-muted">Selecciona un video de la lista para comenzar la de reproducción.</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Right Column: Video list (No Add Form for students) */}
-                    <div className="space-y-6">
-                      {/* Video List */}
-                      <div className="bg-white p-5 rounded-3xl border border-natural-border shadow-3xs space-y-3">
-                        <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border/60">
-                          Videos de la Maestría ({customVideos.length})
-                        </h4>
-                        
-                        <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
-                          {customVideos.map((video) => {
-                            const isSelected = selectedVideoId === video.id;
-                            const isVimeo = video.type === "vimeo";
-                            const isPlaylist = video.type === "youtube_playlist";
-                            return (
-                              <div
-                                key={video.id}
-                                className={`flex items-center justify-between p-2.5 rounded-xl border transition-all text-left ${
-                                  isSelected
-                                    ? "bg-natural-cream text-natural-primary border-natural-primary shadow-3xs font-medium"
-                                    : "bg-natural-eggshell hover:bg-natural-sand/30 border-natural-border/70 text-natural-dark"
-                                }`}
-                              >
-                                <button
-                                  onClick={() => setSelectedVideoId(video.id)}
-                                  className="flex items-center gap-2.5 text-xs text-left w-full min-w-0"
-                                >
-                                  <div className={`p-1.5 rounded-lg shrink-0 ${isSelected ? "bg-natural-primary text-white" : "bg-natural-sand text-natural-primary"}`}>
-                                    <Play className="w-3.5 h-3.5 fill-current" />
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="truncate pr-1 block font-semibold">{video.title}</span>
-                                    <span className="text-[9px] text-natural-text-muted/80 uppercase font-mono tracking-widest">
-                                      {isVimeo ? "Vimeo" : isPlaylist ? "Playlist de YT" : "YouTube Video"}
-                                    </span>
-                                  </div>
-                                </button>
-                              </div>
-                            );
-                          })}
-                          
-                          {customVideos.length === 0 && (
-                            <p className="text-center text-xs text-natural-text-muted py-8">No hay videos en la lista.</p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Documentos de Lectura & Manuales PDF (Descargas desde Google Drive) */}
-                      <div className="bg-gradient-to-b from-natural-cream/80 to-natural-sand/50 p-5 rounded-3xl border border-natural-border shadow-3xs space-y-3">
-                        <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border/60 flex items-center gap-1.5">
-                          <FileText className="w-4 h-4 text-natural-primary" />
-                          Manuales en PDF ({downloadableDocs.length})
-                        </h4>
-                        
-                        <p className="text-[11px] text-natural-text-muted leading-relaxed">
-                          Puedes hacer clic para descargar o abrir el material de estudio directo desde Google Drive:
-                        </p>
-
-                        <div className="space-y-3 pt-1">
-                          {downloadableDocs.map((doc) => (
-                            <div 
-                              key={doc.id}
-                              className="bg-white p-3 rounded-2xl border border-natural-border/60 hover:border-natural-primary/55 transition-all shadow-3xs group flex flex-col justify-between"
-                            >
-                              <div>
-                                <span className="text-[11px] font-bold text-natural-dark block group-hover:text-natural-primary transition-colors leading-normal">
-                                  {doc.title}
-                                </span>
-                                <p className="text-[10px] text-natural-text-muted/90 mt-1 leading-normal">
-                                  {doc.description}
-                                </p>
-                              </div>
-                              
-                              <div className="mt-3 flex justify-end">
-                                <a
-                                  href={doc.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-natural-sand hover:bg-natural-primary/10 rounded-lg text-[10px] uppercase tracking-wider font-bold text-natural-primary transition-colors focus:outline-none border border-natural-border/40 hover:border-natural-primary/30"
-                                >
-                                  <Download className="w-3.5 h-3.5" />
-                                  <span>Descargar Manual</span>
-                                </a>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Notas del Blog */}
-                      <div className="bg-gradient-to-b from-natural-cream/80 to-natural-sand/50 p-5 rounded-3xl border border-natural-border shadow-3xs space-y-3">
-                        <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border/60 flex items-center gap-1.5">
-                          <BookOpen className="w-4 h-4 text-natural-primary" />
-                          Notas del Blog
-                        </h4>
-                        
-                        <p className="text-[11px] text-natural-text-muted leading-relaxed">
-                          Artículos recomendados de Rincón Zen para ampliar tu comprensión y profundizar en temas esenciales:
-                        </p>
-
-                        <div className="space-y-3 pt-1">
-                          <div className="bg-white p-3 rounded-2xl border border-natural-border/60 hover:border-natural-primary/55 transition-all shadow-3xs group flex flex-col justify-between">
-                            <div>
-                              <span className="text-[11px] font-bold text-[#3D301E] block group-hover:text-natural-primary transition-colors leading-normal">
-                                ¿Qué es un Egregor? La energía invisible que también nos habita
-                              </span>
-                              <p className="text-[10px] text-natural-text-muted/90 mt-1 leading-normal">
-                                Descubrí cómo los pensamientos y emociones colectivas crean corrientes energéticas y cómo influyen en nuestra vibración cotidiana.
-                              </p>
-                            </div>
-                            
-                            <div className="mt-3 flex justify-end">
-                              <a
-                                href="https://www.rinconzen.com.ar/post/qu%C3%A9-es-un-egregor-la-energ%C3%ADa-invisible-que-tambi%C3%A9n-nos-habita"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-natural-sand hover:bg-natural-primary/10 rounded-lg text-[10px] uppercase tracking-wider font-bold text-natural-primary transition-colors focus:outline-none border border-natural-border/40 hover:border-natural-primary/30"
-                              >
-                                <BookOpen className="w-3.5 h-3.5" />
-                                <span>Leer Artículo</span>
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center pt-4 border-t border-natural-border">
-                    <button
-                      onClick={() => {
-                        setActiveTab("sensibilidad");
-                        markAsRead("sensibilidad");
-                      }}
-                      className="inline-flex items-center space-x-1 px-4 py-2 bg-natural-cream hover:bg-natural-sand rounded-xl text-xs font-semibold text-natural-dark transition shadow-2xs"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                      <span>Volver</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setActiveTab("test");
-                        markAsRead("test");
-                      }}
-                      className="inline-flex items-center space-x-1.5 px-5 py-2.5 bg-natural-primary text-natural-bg rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors shadow-sm"
-                    >
-                      <span>Comenzar Validación</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
+                <ClassVideosMaterial
+                  classTitle="Clase I"
+                  badge="Sintonía Audiovisual"
+                  introText="Acompañá tu instrucción teórica con los videos, listas de reproducción, documentos PDF y lecturas del blog seleccionados para tu formación de Gokuikaiden."
+                  defaultVideos={defaultVideosClass1}
+                  defaultMaterials={defaultMaterialsClass1}
+                  onBack={() => {
+                    setActiveTab("sensibilidad");
+                    markAsRead("sensibilidad");
+                  }}
+                  onNext={() => {
+                    setActiveTab("test");
+                    markAsRead("test");
+                  }}
+                  nextLabel="Comenzar Validación"
+                />
               )}
 
               {/* === TABS 8: ROADMAP FUTURE GROWTH === */}
@@ -2913,264 +2681,24 @@ export default function App() {
                 </div>
               )}
 
-              {/* === TABS CLASE II: VIDEOS Y DOCUMENTOS === */}
+              {/* === TABS CLASE II: VIDEOS Y MATERIAL === */}
               {activeTab === "c2_videos" && (
-                <div className="space-y-6 animate-fade-in">
-                  <div className="flex items-center justify-between border-b pb-4 border-natural-border">
-                    <div className="flex items-center gap-3">
-                      <Video className="w-6 h-6 text-natural-primary" />
-                      <h3 className="text-xl sm:text-2xl font-serif text-natural-dark font-bold">
-                        Videos y Material en PDF (Clase II)
-                      </h3>
-                    </div>
-                    <span className="text-[10px] px-2.5 py-0.5 bg-natural-cream text-natural-primary rounded-md uppercase tracking-wider font-mono font-semibold">
-                      Sintonía Audiovisual II
-                    </span>
-                  </div>
-
-                  <p className="text-natural-text-muted text-sm leading-relaxed">
-                    Acompaña tu instrucción teórica con recursos audiovisuales oficiales de la maestría para el Nivel II. Visualiza las listas de reproducción recomendadas y videos demostrativos seleccionados para tu formación de Okuden.
-                  </p>
-
-                  <div className="bg-natural-sand/40 border border-natural-border/70 rounded-2xl p-4 flex items-start gap-3 shadow-3xs">
-                    <Info className="w-5 h-5 text-natural-primary shrink-0 mt-0.5" />
-                    <p className="text-xs sm:text-sm text-natural-text-muted font-medium leading-relaxed">
-                      Todo conocimiento necesita su tiempo para revelarse. Por eso, algunos contenidos de esta clase se habilitarán de manera progresiva, acompañando el ritmo natural de la Maestría.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left/Middle Column: Player & Active Video info */}
-                    <div className="lg:col-span-2 space-y-4">
-                      {selectedVideoId2 ? (
-                        <div className="bg-white p-4 rounded-3xl border border-natural-border shadow-3xs overflow-hidden">
-                          <div className="aspect-video w-full rounded-2xl overflow-hidden border border-natural-border bg-black">
-                            {customVideos2.find(v => v.id === selectedVideoId2)?.type === "vimeo" ? (
-                              <iframe
-                                className="w-full h-full"
-                                src={`https://player.vimeo.com/video/${selectedVideoId2}`}
-                                title="Reproductor de Rincón Zen (Vimeo)"
-                                frameBorder="0"
-                                allow="autoplay; fullscreen; picture-in-picture"
-                                allowFullScreen
-                              ></iframe>
-                            ) : customVideos2.find(v => v.id === selectedVideoId2)?.type === "youtube_playlist" ? (
-                              <iframe
-                                className="w-full h-full"
-                                src={`https://www.youtube.com/embed/videoseries?list=${selectedVideoId2}`}
-                                title="Reproductor de Rincón Zen (Playlist de YouTube)"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                              ></iframe>
-                            ) : (
-                              <iframe
-                                className="w-full h-full"
-                                src={`https://www.youtube.com/embed/${selectedVideoId2}`}
-                                title="Reproductor de Rincón Zen (YouTube)"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                              ></iframe>
-                            )}
-                          </div>
-                          
-                          {/* Selected Video Details */}
-                          {customVideos2.find(v => v.id === selectedVideoId2) && (
-                            <div className="mt-4">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-serif text-base text-natural-dark font-bold">
-                                  {customVideos2.find(v => v.id === selectedVideoId2)?.title}
-                                </span>
-                                <span className={`text-[9px] px-2 py-0.5 rounded font-mono font-bold uppercase ${
-                                  customVideos2.find(v => v.id === selectedVideoId2)?.type === "vimeo"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : customVideos2.find(v => v.id === selectedVideoId2)?.type === "youtube_playlist"
-                                    ? "bg-purple-100 text-purple-700"
-                                    : "bg-red-100 text-red-700"
-                                }`}>
-                                  {customVideos2.find(v => v.id === selectedVideoId2)?.type === "vimeo" 
-                                    ? "Vimeo" 
-                                    : customVideos2.find(v => v.id === selectedVideoId2)?.type === "youtube_playlist"
-                                    ? "Playlist de YouTube"
-                                    : "YouTube Video"}
-                                </span>
-                              </div>
-                              <p className="text-xs text-natural-text-muted leading-relaxed whitespace-pre-line">
-                                {customVideos2.find(v => v.id === selectedVideoId2)?.description}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="bg-natural-sand/30 border border-dashed border-natural-border p-12 text-center rounded-3xl">
-                          <Video className="w-12 h-12 text-natural-primary/40 mx-auto mb-3" />
-                          <p className="text-sm text-natural-text-muted">Selecciona un video de la lista para comenzar la reproducción.</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Right Column: Video list */}
-                    <div className="space-y-6">
-                      {/* Video List */}
-                      <div className="bg-white p-5 rounded-3xl border border-natural-border shadow-3xs space-y-3">
-                        <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border/60">
-                          Videos de la Maestría ({customVideos2.length})
-                        </h4>
-                        
-                        <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
-                          {customVideos2.map((video) => {
-                            const isSelected = selectedVideoId2 === video.id;
-                            const isVimeo = video.type === "vimeo";
-                            const isPlaylist = video.type === "youtube_playlist";
-                            return (
-                              <div
-                                key={video.id}
-                                className={`flex items-center justify-between p-2.5 rounded-xl border transition-all text-left ${
-                                  isSelected
-                                    ? "bg-natural-cream text-natural-primary border-natural-primary shadow-3xs font-medium"
-                                    : "bg-natural-eggshell hover:bg-natural-sand/30 border-natural-border/70 text-natural-dark"
-                                }`}
-                              >
-                                <button
-                                  onClick={() => setSelectedVideoId2(video.id)}
-                                  className="flex items-center gap-2.5 text-xs text-left w-full min-w-0"
-                                >
-                                  <div className={`p-1.5 rounded-lg shrink-0 ${isSelected ? "bg-natural-primary text-white" : "bg-natural-sand text-natural-primary"}`}>
-                                    <Play className="w-3.5 h-3.5 fill-current" />
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="truncate pr-1 block font-semibold">{video.title}</span>
-                                    <span className="text-[9px] text-natural-text-muted/80 uppercase font-mono tracking-widest">
-                                      {isVimeo ? "Vimeo" : isPlaylist ? "Playlist de YT" : "YouTube Video"}
-                                    </span>
-                                  </div>
-                                </button>
-                              </div>
-                            );
-                          })}
-                          
-                          {customVideos2.length === 0 && (
-                            <p className="text-center text-xs text-natural-text-muted py-8">No hay videos en la lista.</p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Documentos de Lectura & Manuales PDF */}
-                      <div className="bg-gradient-to-b from-natural-cream/80 to-natural-sand/50 p-5 rounded-3xl border border-natural-border shadow-3xs space-y-3">
-                        <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border/60 flex items-center gap-1.5">
-                          <FileText className="w-4 h-4 text-natural-primary" />
-                          Manuales en PDF ({downloadableDocs2.length})
-                        </h4>
-                        
-                        {downloadableDocs2.length > 0 ? (
-                          <>
-                            <p className="text-[11px] text-natural-text-muted leading-relaxed">
-                              Puedes hacer clic para descargar o abrir el material de estudio directo desde Google Drive:
-                            </p>
- 
-                            <div className="space-y-3 pt-1">
-                              {downloadableDocs2.map((doc) => (
-                                <div 
-                                  key={doc.id}
-                                  className="bg-white p-3 rounded-2xl border border-natural-border/60 hover:border-natural-primary/55 transition-all shadow-3xs group flex flex-col justify-between"
-                                >
-                                  <div>
-                                    <span className="text-[11px] font-bold text-[#3D301E] block group-hover:text-natural-primary transition-colors leading-normal">
-                                      {doc.title}
-                                    </span>
-                                    <p className="text-[10px] text-natural-text-muted/90 mt-1 leading-normal">
-                                      {doc.description}
-                                    </p>
-                                  </div>
-                                  
-                                  <div className="mt-3 flex justify-end">
-                                    <a
-                                      href={doc.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-natural-sand hover:bg-natural-primary/10 rounded-lg text-[10px] uppercase tracking-wider font-bold text-natural-primary transition-colors focus:outline-none border border-natural-border/40 hover:border-natural-primary/30"
-                                    >
-                                      <Download className="w-3.5 h-3.5" />
-                                      <span>Descargar Manual</span>
-                                    </a>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </>
-                        ) : (
-                          <div className="bg-white p-4 rounded-2xl border border-dashed border-natural-border/60 text-center space-y-1">
-                            <p className="text-[11px] text-natural-text-muted/90 italic leading-relaxed">
-                              El nuevo material de estudio oficial se encuentra en proceso de edición y se habilitará en este espacio próximamente.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Notas del Blog */}
-                      <div className="bg-gradient-to-b from-natural-cream/80 to-natural-sand/50 p-5 rounded-3xl border border-natural-border shadow-3xs space-y-3">
-                        <h4 className="font-serif text-xs font-bold text-natural-dark uppercase tracking-widest border-b pb-2 border-natural-border/60 flex items-center gap-1.5">
-                          <BookOpen className="w-4 h-4 text-natural-primary" />
-                          Notas del Blog
-                        </h4>
-                        
-                        <p className="text-[11px] text-natural-text-muted leading-relaxed">
-                          Artículos recomendados de Rincón Zen para ampliar tu comprensión y profundizar en temas esenciales:
-                        </p>
-
-                        <div className="space-y-3 pt-1">
-                          <div className="bg-white p-3 rounded-2xl border border-natural-border/60 hover:border-natural-primary/55 transition-all shadow-3xs group flex flex-col justify-between">
-                            <div>
-                              <span className="text-[11px] font-bold text-[#3D301E] block group-hover:text-natural-primary transition-colors leading-normal">
-                                ¿Qué es un Egregor? La energía invisible que también nos habita
-                              </span>
-                              <p className="text-[10px] text-natural-text-muted/90 mt-1 leading-normal">
-                                Descubrí cómo los pensamientos y emociones colectivas crean corrientes energéticas y cómo influyen en nuestra vibración cotidiana.
-                              </p>
-                            </div>
-                            
-                            <div className="mt-3 flex justify-end">
-                              <a
-                                href="https://www.rinconzen.com.ar/post/qu%C3%A9-es-un-egregor-la-energ%C3%ADa-invisible-que-tambi%C3%A9n-nos-habita"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-natural-sand hover:bg-natural-primary/10 rounded-lg text-[10px] uppercase tracking-wider font-bold text-natural-primary transition-colors focus:outline-none border border-natural-border/40 hover:border-natural-primary/30"
-                              >
-                                <BookOpen className="w-3.5 h-3.5" />
-                                <span>Leer Artículo</span>
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center pt-4 border-t border-natural-border">
-                    <button
-                      onClick={() => {
-                        setActiveTab("c2_jung");
-                        markAsRead("c2_jung");
-                      }}
-                      className="inline-flex items-center space-x-1 px-4 py-2 bg-natural-cream hover:bg-natural-sand rounded-xl text-xs font-semibold text-natural-dark transition shadow-2xs"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                      <span>Volver</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setActiveTab("c2_juegos");
-                        markAsRead("c2_juegos");
-                      }}
-                      className="inline-flex items-center space-x-1.5 px-5 py-2.5 bg-natural-primary text-white rounded-xl text-xs font-semibold hover:bg-natural-primary/95 transition-colors shadow-sm"
-                    >
-                      <span>Juegos Evaluativos</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
+                <ClassVideosMaterial
+                  classTitle="Clase II"
+                  badge="Sintonía Audiovisual"
+                  introText="Acompañá tu instrucción teórica de la Clase II con los videos, listas de reproducción, documentos PDF y lecturas del blog seleccionados para profundizar en el Tao y la práctica energética."
+                  defaultVideos={defaultVideosClass2}
+                  defaultMaterials={defaultMaterialsClass2}
+                  onBack={() => {
+                    setActiveTab("c2_jung");
+                    markAsRead("c2_jung");
+                  }}
+                  onNext={() => {
+                    setActiveTab("c2_juegos");
+                    markAsRead("c2_juegos");
+                  }}
+                  nextLabel="Juegos Evaluativos"
+                />
               )}
 
               {/* === TABS CLASE II: JUEGOS Y TRIVIA === */}
@@ -3618,6 +3146,35 @@ export default function App() {
                   markAsRead(tabId);
                 }}
               />
+
+              {/* === TABS CLASE VI: EL MAESTRO Y SU RESPONSABILIDAD === */}
+              <Class6Section
+                activeTab={activeTab}
+                onNavigateTab={(tabId) => {
+                  setActiveTab(tabId);
+                  markAsRead(tabId);
+                }}
+              />
+
+              {/* === TABS CLASE VII: VIDEOS Y MATERIAL === */}
+              {activeTab === "c7_videos" && (
+                <ClassVideosMaterial
+                  classTitle="Clase VII"
+                  badge="Sintonía Audiovisual"
+                  introText="Acompañá el Grado del Shihan con los recursos audiovisuales, documentos PDF y lecturas seleccionadas para la Clase VII."
+                  defaultVideos={[]}
+                  defaultMaterials={[]}
+                  onBack={() => {
+                    setActiveTab("c7_ensenar");
+                    markAsRead("c7_ensenar");
+                  }}
+                  onNext={() => {
+                    setActiveTab("c7_graduacion");
+                    markAsRead("c7_graduacion");
+                  }}
+                  nextLabel="Grado de Maestro"
+                />
+              )}
 
             </motion.div>
           </AnimatePresence>
