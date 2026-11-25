@@ -943,30 +943,30 @@ export default function App() {
 
                 {/* Card 6 */}
                 <button 
-                  onClick={() => changeClass(6)}
-                  className="text-left bg-white p-6 rounded-3xl border border-natural-border hover:border-natural-primary/50 hover:shadow-2xs transition-all duration-300 group flex flex-col justify-between h-64 cursor-pointer"
-                >
-                  <div>
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 rounded-2xl bg-natural-sand text-natural-primary group-hover:bg-natural-primary group-hover:text-white transition-all">
-                        <ShieldAlert className="w-6 h-6" />
-                      </div>
-                      <span className="text-[10px] uppercase font-mono font-bold tracking-widest px-2.5 py-1 bg-[#eef6f0] text-[#3e7256] rounded-full">
-                        Disponible
-                      </span>
-                    </div>
-                    <h4 className="font-serif text-base font-bold text-natural-dark group-hover:text-natural-primary transition-colors">
-                      Clase VI: El Maestro y su Responsabilidad
-                    </h4>
-                    <p className="text-xs text-natural-text-muted mt-2 leading-relaxed line-clamp-3">
-                      Ética, consentimiento, autoridad con humildad, discernimiento crítico, manejo de situaciones difíciles y evaluación práctica.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-natural-primary pt-4 mt-auto border-t border-natural-border/40 w-full">
-                    <span>Ingresar a Clase VI</span>
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </button>
+  onClick={() => changeClass(6)}
+  className="text-left bg-white p-6 rounded-3xl border border-natural-border hover:border-natural-primary/50 hover:shadow-2xs transition-all duration-300 group flex flex-col justify-between h-64 cursor-pointer"
+>
+  <div>
+    <div className="flex justify-between items-start mb-4">
+      <div className="p-3 rounded-2xl bg-natural-sand text-natural-primary group-hover:bg-natural-primary group-hover:text-white transition-all">
+        <ShieldAlert className="w-6 h-6" />
+      </div>
+      <span className="text-[10px] uppercase font-mono font-bold tracking-widest px-2.5 py-1 bg-[#eef6f0] text-[#3e7256] rounded-full">
+        Disponible
+      </span>
+    </div>
+    <h4 className="font-serif text-base font-bold text-natural-dark group-hover:text-natural-primary transition-colors">
+      Clase VI: El Maestro y su Responsabilidad
+    </h4>
+    <p className="text-xs text-natural-text-muted mt-2 leading-relaxed line-clamp-3">
+      Ética, consentimiento, autoridad con humildad, discernimiento crítico, manejo de situaciones difíciles y evaluación práctica.
+    </p>
+  </div>
+  <div className="flex items-center gap-1.5 text-xs font-bold text-natural-primary pt-4 mt-auto border-t border-natural-border/40 w-full">
+    <span>Ingresar a Clase VI</span>
+    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+  </div>
+</button>
 
                 {/* Card 7 (Locked) */}
                 <div 
